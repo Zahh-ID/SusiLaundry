@@ -1,0 +1,221 @@
+{
+  "system_name": "Sistem Layanan Laundry Omah Susi (Guest & Admin)",
+
+  "use_case": {
+    "actors": [
+      {
+        "name": "Guest",
+        "description": "Pengunjung tanpa login yang dapat membuat pesanan dan melihat status pesanan."
+      },
+      {
+        "name": "Admin",
+        "description": "Pengelola sistem yang mengatur transaksi, paket, laporan, dan operasional."
+      }
+    ],
+
+    "use_cases": [
+      {
+        "id": "UC01",
+        "name": "Melihat Landing Page",
+        "actor": "Guest",
+        "goal": "Guest melihat informasi layanan, paket, dan CTA pemesanan.",
+        "precondition": "Guest mengakses halaman home.",
+        "postcondition": "Halaman landing tampil."
+      },
+      {
+        "id": "UC02",
+        "name": "Membuat Pesanan Laundry",
+        "actor": "Guest",
+        "goal": "Guest melakukan pemesanan tanpa login.",
+        "precondition": "Guest membuka halaman pemesanan.",
+        "postcondition": "Pesanan tersimpan dan kode tracking dihasilkan."
+      },
+      {
+        "id": "UC03",
+        "name": "Melihat Status Pesanan",
+        "actor": "Guest",
+        "goal": "Guest melihat status pesanan dengan memasukkan kode tracking.",
+        "precondition": "Guest memiliki kode pesanan.",
+        "postcondition": "Status pesanan ditampilkan."
+      },
+      {
+        "id": "UC04",
+        "name": "Login Admin",
+        "actor": "Admin",
+        "goal": "Admin masuk ke dashboard untuk mengelola data.",
+        "precondition": "Admin memiliki akun.",
+        "postcondition": "Admin masuk ke halaman dashboard."
+      },
+      {
+        "id": "UC05",
+        "name": "Mengelola Data Transaksi",
+        "actor": "Admin",
+        "goal": "Admin melihat, mengedit, memperbarui status, dan menghapus transaksi.",
+        "precondition": "Admin sudah login.",
+        "postcondition": "Data transaksi berubah."
+      },
+      {
+        "id": "UC06",
+        "name": "Mengelola Daftar Paket Laundry",
+        "actor": "Admin",
+        "goal": "Admin menambah, mengubah, atau menghapus paket.",
+        "precondition": "Admin sudah login.",
+        "postcondition": "Data paket tersimpan atau berubah."
+      },
+      {
+        "id": "UC07",
+        "name": "Melihat & Mencetak Laporan",
+        "actor": "Admin",
+        "goal": "Admin menampilkan dan mendownload laporan transaksi.",
+        "precondition": "Admin sudah login.",
+        "postcondition": "Laporan diunduh."
+      }
+    ]
+  },
+
+  "erd": {
+    "entities": [
+      {
+        "name": "admins",
+        "primary_key": "id",
+        "attributes": [
+          "email",
+          "password",
+          "name",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      {
+        "name": "customers",
+        "primary_key": "id",
+        "attributes": [
+          "name",
+          "phone",
+          "address",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      {
+        "name": "packages",
+        "primary_key": "id",
+        "attributes": [
+          "package_name",
+          "description",
+          "price_per_kg",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      {
+        "name": "orders",
+        "primary_key": "id",
+        "attributes": [
+          "order_code",
+          "customer_id",
+          "package_id",
+          "estimated_weight",
+          "actual_weight",
+          "service_type",
+          "notes",
+          "status",
+          "total_price",
+          "created_at",
+          "updated_at"
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "from": "customers",
+        "to": "orders",
+        "type": "one_to_many",
+        "description": "Satu customer dapat membuat banyak order."
+      },
+      {
+        "from": "packages",
+        "to": "orders",
+        "type": "one_to_many",
+        "description": "Satu paket dapat digunakan di banyak order."
+      },
+      {
+        "from": "admins",
+        "to": "orders",
+        "type": "zero_or_many_to_many",
+        "description": "Admin mengelola order (update status, input berat)."
+      }
+    ]
+  },
+
+  "dfd": {
+    "level_0": {
+      "process": "Sistem Laundry Omah Susi",
+      "external_entities": [
+        "Guest",
+        "Admin"
+      ],
+      "data_flows": [
+        {
+          "from": "Guest",
+          "to": "Sistem Laundry Omah Susi",
+          "data": "Data pemesanan, kode tracking"
+        },
+        {
+          "from": "Sistem Laundry Omah Susi",
+          "to": "Guest",
+          "data": "Informasi layanan, status pesanan"
+        },
+        {
+          "from": "Admin",
+          "to": "Sistem Laundry Omah Susi",
+          "data": "Login, pembaruan data, CRUD"
+        },
+        {
+          "from": "Sistem Laundry Omah Susi",
+          "to": "Admin",
+          "data": "Data transaksi, laporan, statistik"
+        }
+      ],
+      "data_stores": [
+        "Tabel Admin",
+        "Tabel Customer",
+        "Tabel Orders",
+        "Tabel Packages"
+      ]
+    },
+
+    "level_1": {
+      "processes": [
+        {
+          "id": "1.0",
+          "name": "Kelola Pesanan",
+          "inputs": ["Data pemesanan guest"],
+          "outputs": ["Kode pesanan", "Status pesanan"],
+          "data_stores": ["Customer", "Orders", "Packages"]
+        },
+        {
+          "id": "2.0",
+          "name": "Kelola Paket",
+          "inputs": ["Data paket"],
+          "outputs": ["Daftar paket"],
+          "data_stores": ["Packages"]
+        },
+        {
+          "id": "3.0",
+          "name": "Kelola Admin",
+          "inputs": ["Email & password admin"],
+          "outputs": ["Status login"],
+          "data_stores": ["Admins"]
+        },
+        {
+          "id": "4.0",
+          "name": "Kelola Laporan",
+          "inputs": ["Data transaksi"],
+          "outputs": ["Laporan grafik, laporan PDF/Excel"],
+          "data_stores": ["Orders"]
+        }
+      ]
+    }
+  }
+}

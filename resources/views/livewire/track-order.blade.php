@@ -1,0 +1,128 @@
+@php
+    $trackingSteps = ['Diterima', 'Dicuci', 'Dijemur', 'Disetrika', 'Siap Diambil / Diantar'];
+    $timelineSteps = array_merge(['Menunggu Konfirmasi'], $trackingSteps);
+    $statusIndex = $order ? collect($timelineSteps)->search(fn ($label) => strtolower($label) === strtolower($order->status)) : -1;
+@endphp
+<div class="mx-auto grid w-full max-w-6xl gap-10 px-6 py-16 lg:grid-cols-2">
+    <div>
+        <p class="text-sm font-semibold text-primary">Tracking Pesanan</p>
+        <h1 class="mb-3 text-4xl font-bold text-slate-900">Pantau status kapan saja</h1>
+        <p class="text-slate-600">Masukkan kode tracking (10 karakter) yang kami kirim lewat WhatsApp. Status pesanan akan tampil otomatis.</p>
+        <div class="mt-10 space-y-4 rounded-3xl border border-slate-100 bg-slate-50 p-6">
+            <p class="text-sm font-semibold text-slate-700">Status Pesanan</p>
+            <ul class="space-y-3 text-sm text-slate-500">
+                @foreach($timelineSteps as $index => $step)
+                    <li class="{{ $order && $statusIndex !== false && $index <= $statusIndex ? 'font-semibold text-slate-900' : '' }}">
+                        {{ $step }}
+                        @if ($index === 0)
+                            <span class="text-xs text-slate-400">— pesanan diterima dan menunggu pick up.</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+        <a href="{{ route('landing') }}" class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-indigo-600">
+            ← Kembali ke Home
+        </a>
+    </div>
+    <div class="rounded-3xl border border-slate-100 bg-white p-8 shadow-soft">
+        <form wire:submit.prevent="track" class="space-y-4">
+            <div>
+                <label for="order_code" class="text-sm font-semibold text-slate-600">Kode Tracking</label>
+                <input type="text" id="order_code" wire:model.defer="order_code" placeholder="Masukkan kode"
+                       class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                @error('order_code') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            </div>
+            <button type="submit" class="w-full rounded-2xl bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
+                Cek Status
+            </button>
+        </form>
+
+        @if ($errorMessage)
+            <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+                {{ $errorMessage }}
+            </div>
+        @endif
+
+        @if ($order)
+            @php
+                $progressSteps = ['Menunggu Konfirmasi', 'Diterima', 'Dicuci', 'Dikeringkan', 'Disetrika', 'Siap Diambil / Diantar', 'Selesai'];
+                $activeIndex = collect($progressSteps)->search(function ($label) use ($order) {
+                    return strtolower($label) === strtolower($order->status);
+                });
+            @endphp
+            <div class="mt-6 space-y-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-5 text-sm text-slate-600">
+                <div>
+                    <p class="text-xs uppercase text-slate-400">Kode Pesanan</p>
+                    <p class="text-2xl font-bold tracking-wide text-slate-900">{{ $order->order_code }}</p>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <p class="text-xs uppercase text-slate-400">Status</p>
+                        <p class="text-lg font-semibold text-primary">{{ $order->status_label }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase text-slate-400">Estimasi Berat</p>
+                        <p class="text-lg font-semibold">{{ $order->estimated_weight }} kg</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase text-slate-400">Paket</p>
+                        <p class="text-lg font-semibold">{{ $order->package?->package_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase text-slate-400">Layanan</p>
+                        <p class="text-lg font-semibold capitalize">{{ $order->service_type }}</p>
+                    </div>
+                </div>
+                @if($order->total_price)
+                    <div>
+                        <p class="text-xs uppercase text-slate-400">Total Biaya</p>
+                        <p class="text-lg font-bold text-emerald-600">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+                    </div>
+                @endif
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <p class="text-xs uppercase text-slate-400">Metode Pembayaran</p>
+                        <p class="text-lg font-semibold text-slate-900">{{ ucfirst($order->payment_method) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase text-slate-400">Status Pembayaran</p>
+                        <p class="text-lg font-semibold text-slate-900">{{ $order->payment_status_label }}</p>
+                    </div>
+                </div>
+                <div class="pt-4">
+                    <p class="text-xs uppercase text-slate-400">Progress</p>
+                    <ul class="mt-3 space-y-2">
+                        @foreach($progressSteps as $index => $label)
+                            <li class="flex items-center gap-3 {{ $activeIndex !== false && $index <= $activeIndex ? 'text-slate-900 font-semibold' : '' }}">
+                                <span class="flex h-6 w-6 items-center justify-center rounded-full {{ $activeIndex !== false && $index <= $activeIndex ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500' }}">
+                                    {{ $index + 1 }}
+                                </span>
+                                <span>{{ $label }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+                @if($order->payment_method === 'qris')
+                    @php
+                        $pendingPayment = $order->payments->firstWhere('status', 'pending') ?? $order->payments->first();
+                    @endphp
+                    @if($pendingPayment)
+                        <div class="rounded-2xl border border-slate-100 bg-white p-4 text-center">
+                            <p class="text-sm font-semibold text-slate-700">Scan QRIS untuk melakukan pembayaran</p>
+                            <img src="{{ $pendingPayment->qris_image_url }}" alt="QRIS" class="mx-auto mt-4 h-40 w-40 rounded-xl border border-slate-200">
+                            <p class="mt-2 text-xs text-slate-500">Kedaluwarsa pada {{ optional($pendingPayment->expiry_time)->translatedFormat('d M Y H:i') }}</p>
+                            <a href="{{ $pendingPayment->qris_url }}" target="_blank" class="mt-3 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white">
+                                Buka QRIS
+                            </a>
+                        </div>
+                    @endif
+                @else
+                    <div class="rounded-2xl border border-slate-100 bg-white p-4 text-sm text-slate-600">
+                        Pembayaran cash akan diproses oleh kurir kami saat pickup/delivery.
+                    </div>
+                @endif
+            </div>
+        @endif
+    </div>
+</div>

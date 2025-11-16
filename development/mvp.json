@@ -1,0 +1,321 @@
+{
+  "system": "Laundry Management with QRIS, Cash, WhatsApp Automation - Extended Logic",
+  "version": "1.1",
+  "entities": {
+    "order": {
+      "fields": {
+        "order_id": "string (PK)",
+        "guest_name": "string",
+        "guest_phone": "string",
+        "guest_address": "string",
+        "service_type": "string",
+        "estimated_weight": "number",
+        "actual_weight": "number|null",
+        "price_per_kg": "number|null",
+        "total_price": "number|null",
+        "payment_method": "cash|qris",
+        "payment_status": "pending|paid|expired|failed|skipped",
+        "order_status": "order_created|accepted|weight_set|waiting_payment|paid|washing|drying|ironing|packing|ready_for_pickup|out_for_delivery|completed|cancelled",
+        "queue_position": "integer|null",
+        "estimated_completion": "datetime|null",
+        "pickup_or_delivery": "none|pickup|delivery",
+        "delivery_fee": "number|null",
+        "admin_id": "string|null",
+        "activity_log": "array of {actor,action,timestamp,meta}",
+        "created_at": "datetime",
+        "updated_at": "datetime"
+      }
+    },
+    "payment": {
+      "fields": {
+        "payment_id": "string (PK)",
+        "order_id": "string (FK)",
+        "method": "qris|cash",
+        "amount": "number",
+        "status": "pending|paid|failed|expired|skipped",
+        "qris_url": "string|null",
+        "qris_image_url": "string|null",
+        "midtrans_transaction_id": "string|null",
+        "expiry_time": "datetime|null",
+        "created_at": "datetime",
+        "updated_at": "datetime"
+      }
+    },
+    "admin": {
+      "fields": {
+        "admin_id": "string",
+        "name": "string",
+        "email": "string",
+        "role": "string",
+        "created_at": "datetime"
+      }
+    }
+  },
+  "constraints_and_limits": {
+    "max_active_orders_per_phone": 3,
+    "qris_expiry_minutes": 30,
+    "weight_discrepancy_threshold_percent": 40,
+    "qris_auto_regenerate_on_expiry": true,
+    "anti_duplicate_payment_check": true,
+    "duplicate_midtrans_txn_ignore_window_seconds": 300,
+    "order_queue_enabled": true,
+    "max_qris_regenerations_per_order_per_day": 3,
+    "admin_daily_report_time": "20:00"
+  },
+  "flows": {
+    "order_creation_flow": {
+      "trigger": "Guest submits order form",
+      "actions": [
+        "create order with order_status = order_created, payment_status = pending/skipped depending on chosen method",
+        "generate order_id",
+        "save guest record if phone not exist",
+        "push activity_log entry",
+        "send WA confirmation template: order_created"
+      ],
+      "post_conditions": [
+        "order exists in DB",
+        "guest receives WA with order_id & brief info"
+      ]
+    },
+    "admin_accept_and_weight_flow": {
+      "trigger": "Admin accepts order and inputs actual_weight & price_per_kg",
+      "conditions": [
+        "if estimated_weight exists then compute discrepancy_percent = ((actual - estimated) / estimated) * 100"
+      ],
+      "actions": [
+        "update order.actual_weight, price_per_kg, total_price",
+        "append activity_log",
+        "if discrepancy_percent > weight_discrepancy_threshold_percent then set order_status = weight_set (awaiting_guest_confirmation) and send WA with weight_discrepancy template containing 'Confirm' link",
+        "else set order_status = weight_set (waiting_payment if qris OR processing if cash)",
+        "if payment_method == qris then generate QRIS via Midtrans and create payment record with status=pending and expiry_time; send QRIS to WA",
+        "if payment_method == cash then set payment.status = skipped and send WA with cash payment instruction"
+      ],
+      "guest_actions": [
+        "guest may click Confirm on WA link => if confirmed set flow to proceed: if qris show QRIS else proceed",
+        "guest may click Decline => admin notified via WA and order flagged for manual follow-up"
+      ]
+    },
+    "weight_discrepancy_confirmation_flow": {
+      "trigger": "Guest clicks confirm/decline link from WA (or uses tracking page)",
+      "actions": [
+        "if guest confirms then continue normal payment flow (generate QRIS if qris needed)",
+        "if guest declines then set order_status = order_created? or flag manual_followup and notify admin"
+      ]
+    },
+    "qris_generation_and_send_flow": {
+      "trigger": "System needs QRIS (admin input weight and payment_method==qris OR auto-regenerate on expiry)",
+      "actions": [
+        "call Midtrans API to create QRIS transaction (Snap/Core as appropriate)",
+        "store midtrans_transaction_id, qris_url, qris_image_url, expiry_time",
+        "create payment record with status = pending",
+        "send WA to guest with qris_image_url + qris_url + expiry_time",
+        "start payment_monitoring job for this payment (poll or rely on webhook)"
+      ],
+      "safety": [
+        "check anti_duplicate: if payment record for order.status paid exists, abort generation",
+        "limit regenerations based on constraints.max_qris_regenerations_per_order_per_day"
+      ]
+    },
+    "midtrans_webhook_flow": {
+      "trigger": "Midtrans sends webhook event (paid/expired/failed)",
+      "actions": [
+        "verify webhook signature",
+        "if transaction already processed (duplicate_midtrans_txn) ignore",
+        "map midtrans event => update payment.status and order.payment_status",
+        "if payment becomes paid then set order.payment_status = paid and set order.order_status = paid or washing (depending on automation settings)",
+        "generate PDF receipt and attach (or store url)",
+        "send WA to guest: payment_success + attach receipt",
+        "if expired then if constraints.qris_auto_regenerate_on_expiry true => auto generate new QRIS and send WA OR notify admin to re-generate based on policy",
+        "log activity"
+      ],
+      "security": [
+        "verify idempotency using midtrans_transaction_id",
+        "ignore events older than duplicate_midtrans_txn_ignore_window_seconds if processed"
+      ]
+    },
+    "status_update_notifications_flow": {
+      "trigger": "Admin updates order_status (washing/drying/ironing/packing/ready/ out_for_delivery/completed)",
+      "actions": [
+        "append activity_log",
+        "if new status in ['washing','drying','ironing','packing','ready_for_pickup','out_for_delivery','completed'] then send WA template order_status_updated with status and ETA",
+        "if completed then send WA template order_finished and include invoice/download link"
+      ]
+    },
+    "auto_regenerate_qris_on_expiry_flow": {
+      "trigger": "payment.status == expired and qris_auto_regenerate_on_expiry == true",
+      "actions": [
+        "if regeneration_count_for_order_today < max_qris_regenerations_per_order_per_day then call qris_generation_and_send_flow",
+        "else notify admin via WA to re-initiate and log action"
+      ]
+    },
+    "anti_duplicate_payment_flow": {
+      "trigger": "Incoming webhook from Midtrans or manual payment update",
+      "actions": [
+        "check if midtrans_transaction_id already exists in payments table and is marked processed; if yes ignore the event",
+        "if not exists then process normally and mark transaction_id processed",
+        "prevent generating new QRIS if payment_status == paid"
+      ]
+    },
+    "auto_receipt_generation_flow": {
+      "trigger": "payment.status transitions to paid",
+      "actions": [
+        "generate PDF receipt/invoice (include order details, breakdown, QRIS transaction id)",
+        "store URL to receipt in payment record",
+        "send receipt to guest via WA"
+      ]
+    },
+    "admin_daily_report_flow": {
+      "trigger": "cron daily at admin_daily_report_time",
+      "actions": [
+        "aggregate today's totals: orders, paid_qris, cash_collected (marks), expired_qris, pending_orders",
+        "generate summary text + optional CSV/Excel",
+        "send WA to admin group or admin number with report and attach export link"
+      ]
+    },
+    "anti_spam_and_rate_limit_flow": {
+      "trigger": "guest attempts to create order",
+      "conditions": [
+        "count active orders for guest_phone"
+      ],
+      "actions": [
+        "if count >= max_active_orders_per_phone then reject new order creation and return message 'You have X active orders. Please complete first.' and send WA notification",
+        "else create order normally"
+      ]
+    },
+    "queue_and_eta_estimation_flow": {
+      "trigger": "new order accepted OR admin requests ETA",
+      "actions": [
+        "if order_queue_enabled then compute queue_position based on current processing throughput and active_weights",
+        "estimate completion_time = now + function( queue_workload, machine_capacity, order_weight )",
+        "store queue_position and estimated_completion in order",
+        "send WA to guest with estimated_completion"
+      ],
+      "notes": [
+        "Algorithm can be linear or more advanced (weighted by item type)",
+        "Allow admin override of estimated_completion"
+      ]
+    },
+    "pickup_delivery_flow": {
+      "trigger": "order.pickup_or_delivery set to pickup/delivery",
+      "actions": [
+        "create pickup schedule entry, assign driver if auto-assignment enabled",
+        "send WA to guest with pickup ETA and driver contact when driver assigned",
+        "update statuses: driver_en_route -> picked_up -> returned_to_laundry -> out_for_delivery -> delivered",
+        "send WA at each driver status change"
+      ]
+    },
+    "refund_and_price_change_policy_flow": {
+      "trigger": "admin attempts to change total_price after payment_status == paid",
+      "actions": [
+        "block automatic price change and require admin to create manual adjustment record",
+        "if price must be decreased then create refund request workflow (manual review) and notify finance admin",
+        "send WA to guest to inform about adjustment steps"
+      ]
+    }
+  },
+  "whatsapp_templates": {
+    "order_created": "Halo {name}, pesanan Anda (#{order_id}) telah diterima. Kami akan konfirmasi setelah penimbangan. Terima kasih!",
+    "weight_discrepancy": "Halo {name}, berat aktual pesanan #{order_id} adalah {actual_weight} kg (estimasi Anda {estimated_weight} kg). Konfirmasi: [Setuju]({confirm_url}) | [Tidak Setuju]({decline_url})",
+    "qris_sent": "Halo {name}, total pesanan #{order_id} adalah {total_price}. Silakan scan QR berikut untuk membayar (kadaluarsa: {expiry_time}): {qris_url}",
+    "qris_expired": "Halo {name}, QRIS untuk pesanan #{order_id} sudah kadaluarsa. Kami telah mengirim QRIS baru. Jika ada kendala hubungi kami.",
+    "payment_success": "Pembayaran pesanan #{order_id} berhasil diterima. Terima kasih! Struk: {receipt_url}",
+    "order_status_updated": "Status pesanan #{order_id} berubah menjadi: {status}. Estimasi selesai: {eta}",
+    "order_finished": "Pesanan #{order_id} telah selesai. Silakan ambil/siapkan untuk diterima. Terima kasih telah menggunakan Omah Susi Laundry!",
+    "admin_daily_report": "Laporan harian {date}: Orders: {total_orders}, QRIS Paid: {qris_paid}, Cash: {cash_total}, Pending: {pending_orders}."
+  },
+  "api_endpoints_recommended": {
+    "guest": [
+      {
+        "endpoint": "POST /api/orders",
+        "purpose": "Create order (guest)"
+      },
+      {
+        "endpoint": "GET /api/orders/{order_id}",
+        "purpose": "Get order detail & payment status"
+      },
+      {
+        "endpoint": "GET /api/orders/{order_id}/tracking",
+        "purpose": "Get status timeline"
+      }
+    ],
+    "admin": [
+      {
+        "endpoint": "PUT /api/admin/orders/{order_id}/weight",
+        "purpose": "Admin input actual weight & price"
+      },
+      {
+        "endpoint": "POST /api/admin/orders/{order_id}/generate-qris",
+        "purpose": "Force generate QRIS"
+      },
+      {
+        "endpoint": "PUT /api/admin/orders/{order_id}/status",
+        "purpose": "Update order status"
+      },
+      {
+        "endpoint": "GET /api/admin/reports/daily",
+        "purpose": "Get daily report"
+      }
+    ],
+    "webhook": [
+      {
+        "endpoint": "POST /api/payment/webhook",
+        "purpose": "Midtrans webhook receiver"
+      }
+    ]
+  },
+  "database_indexes_and_migrations_suggestions": {
+    "payments": [
+      "index on midtrans_transaction_id",
+      "index on order_id",
+      "index on status"
+    ],
+    "orders": [
+      "index on guest_phone",
+      "index on order_status",
+      "index on payment_status",
+      "index on created_at"
+    ],
+    "activity_log": [
+      "store as separate table order_activity (order_id, actor, action, meta, created_at) for audit"
+    ],
+    "migrations": [
+      "add columns: queue_position (int), estimated_completion (datetime), pickup_or_delivery (enum), delivery_fee (decimal), regeneration_count (int default 0) to orders",
+      "create payments table with midtrans fields and expiry_time"
+    ]
+  },
+  "cron_jobs_and_background_workers": {
+    "payment_expiry_monitor": {
+      "schedule": "every 1 minute",
+      "task": "Find payments where status=pending and expiry_time < now() => mark expired => trigger auto_regenerate_qris_on_expiry_flow or notify admin"
+    },
+    "daily_report_job": {
+      "schedule": "daily at admin_daily_report_time",
+      "task": "Run admin_daily_report_flow"
+    },
+    "queue_eta_recalculator": {
+      "schedule": "every 5 minutes (or on new order)",
+      "task": "Recalculate queue positions and ETAs"
+    },
+    "reminder_job": {
+      "schedule": "30 minutes and 24 hours after QRIS generation if still pending",
+      "task": "Send WA reminder to guest (configurable)"
+    }
+  },
+  "security_and_idempotency": {
+    "webhook_signature_verification": "Verify midtrans signature/hash on webhook",
+    "idempotency_keys": "Store and check idempotency for critical operations like payment processing",
+    "rate_limits": {
+      "create_order_per_phone_per_hour": 5,
+      "generate_qris_per_order_per_day": 3
+    },
+    "logs": "Persist detailed logs of webhook events, WA send attempts, and admin actions for auditing"
+  },
+  "notes_and_recommendations": {
+    "use_events_and_listeners": "Implement events (OrderCreated, WeightSet, PaymentPaid, StatusUpdated) and listeners to decouple logic",
+    "use_jobs_and_queues": "Long-running tasks (generate QRIS, send WA with image, generate PDF) should run in background queue",
+    "retry_and_backoff": "Implement retry policies for network calls (Midtrans, WA gateway) with exponential backoff",
+    "admin_override": "Provide UI for admin to override ETA and regenerate QRIS manually with audit trail",
+    "testing": "Thoroughly test webhook flows with Midtrans sandbox and simulate network failures",
+    "monitoring": "Monitor background workers, webhook receipts, and WA delivery statuses"
+  }
+}

@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Livewire\Admin\Package;
+
+use App\Models\Package;
+use Livewire\Component;
+
+class Create extends Component
+{
+    public $package_name;
+    public $description;
+    public $price_per_kg;
+    public $billing_type = 'per_kg';
+    public $turnaround_hours = 48;
+
+    public function save()
+    {
+        $this->validate([
+            'package_name' => 'required|string',
+            'description' => 'required|string',
+            'price_per_kg' => 'required|numeric',
+            'billing_type' => 'required|string',
+            'turnaround_hours' => 'required|integer|min:1',
+        ]);
+
+        Package::create([
+            'package_name' => $this->package_name,
+            'description' => $this->description,
+            'price_per_kg' => $this->price_per_kg,
+            'billing_type' => $this->billing_type,
+            'turnaround_hours' => $this->turnaround_hours,
+        ]);
+
+        session()->flash('message', 'Package successfully created.');
+
+        return redirect()->to('/admin/packages');
+    }
+
+    public function render()
+    {
+        return view('livewire.admin.package.create')
+            ->layout('layouts.admin', ['title' => 'Tambah Paket Laundry']);
+    }
+}

@@ -1,0 +1,101 @@
+{
+  "roles": {
+    "guest": {
+      "description": "Pengunjung yang tidak perlu login untuk membuat pesanan dan melihat layanan.",
+      "permissions": [
+        "Melihat landing page",
+        "Melihat daftar layanan/paket",
+        "Membuat pesanan laundry melalui form",
+        "Mengirim data pesanan",
+        "Melihat detail pesanan menggunakan kode tracking",
+        "Melihat informasi kontak laundry"
+      ]
+    },
+    "admin": {
+      "description": "Pengelola sistem dengan akses penuh untuk mengatur transaksi dan operasional.",
+      "permissions": [
+        "Login ke dashboard admin",
+        "Melihat semua data transaksi",
+        "Mengupdate status pesanan",
+        "Input berat aktual laundry",
+        "Menghitung total biaya",
+        "Mengelola data paket laundry (CRUD)",
+        "Mengelola admin lain",
+        "Mengirim notifikasi WhatsApp",
+        "Menghasilkan invoice PDF",
+        "Melihat dan mencetak laporan harian/bulanan"
+      ]
+    }
+  },
+
+  "methods": {
+    "guest": {
+      "GET_/": "Menampilkan landing page (home)",
+      "GET_/paket": "Menampilkan daftar layanan/paket laundry",
+      "GET_/order": "Menampilkan form pemesanan",
+      "POST_/order/store": "Mengirim data pemesanan baru",
+      "GET_/tracking": "Menampilkan halaman input kode tracking",
+      "GET_/tracking/{kode}": "Menampilkan status pesanan berdasarkan kode"
+    },
+    "admin": {
+      "GET_/admin/login": "Menampilkan halaman login admin",
+      "POST_/admin/login": "Proses autentikasi admin",
+      "GET_/admin/dashboard": "Menampilkan halaman utama dashboard admin",
+      "GET_/admin/transaksi": "Menampilkan daftar transaksi",
+      "GET_/admin/transaksi/{id}": "Melihat detail transaksi",
+      "PUT_/admin/transaksi/{id}/status": "Update status pesanan",
+      "PUT_/admin/transaksi/{id}/berat": "Input berat aktual",
+      "GET_/admin/paket": "Menampilkan daftar paket",
+      "POST_/admin/paket/store": "Tambah paket baru",
+      "PUT_/admin/paket/{id}": "Update paket",
+      "DELETE_/admin/paket/{id}": "Hapus paket",
+      "GET_/admin/laporan": "Halaman laporan",
+      "GET_/admin/laporan/export": "Download laporan PDF/Excel"
+    }
+  },
+
+  "cta": {
+    "guest": [
+      {
+        "name": "Pesan Sekarang",
+        "location": "Landing page & section layanan",
+        "purpose": "Mengarah ke form pemesanan laundry",
+        "action": "GET_/order"
+      },
+      {
+        "name": "Cek Status",
+        "location": "Navbar & halaman tracking",
+        "purpose": "Guest bisa memeriksa status pesanan tanpa login",
+        "action": "GET_/tracking"
+      },
+      {
+        "name": "Hubungi Kami",
+        "location": "Footer & halaman kontak",
+        "purpose": "Menghubungi pihak laundry via WA atau telepon",
+        "action": "External link (WhatsApp API)"
+      }
+    ],
+    "admin": [
+      {
+        "name": "Update Status",
+        "purpose": "Mengubah status pesanan dari menunggu → proses → selesai",
+        "action": "PUT_/admin/transaksi/{id}/status"
+      },
+      {
+        "name": "Input Berat",
+        "purpose": "Memasukkan berat aktual dan menghitung biaya akhir",
+        "action": "PUT_/admin/transaksi/{id}/berat"
+      },
+      {
+        "name": "Tambah Paket",
+        "purpose": "Menambahkan layanan/paket laundry baru",
+        "action": "POST_/admin/paket/store"
+      },
+      {
+        "name": "Cetak Invoice",
+        "purpose": "Menghasilkan invoice PDF untuk pelanggan",
+        "action": "GET_/admin/transaksi/{id}/invoice"
+      }
+    ]
+  }
+}

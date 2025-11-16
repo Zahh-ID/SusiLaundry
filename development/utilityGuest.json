@@ -1,0 +1,155 @@
+{
+  "role": "guest",
+  "description": "Pengunjung aplikasi laundry yang belum login. Hanya bisa melakukan pemesanan, melihat harga, tracking pesanan, dan menghubungi admin.",
+  "pages": [
+    {
+      "page": "Landing Page / Home",
+      "description": "Halaman utama untuk memperkenalkan layanan laundry.",
+      "cta": [
+        "Lihat Daftar Harga",
+        "Buat Pesanan",
+        "Cek Status Laundry",
+        "Hubungi Admin",
+        "Tentang Kami",
+        "Lihat Promo"
+      ]
+    },
+    {
+      "page": "Daftar Harga",
+      "description": "Menampilkan semua jenis layanan dan tarif.",
+      "cta": [
+        "Kembali",
+        "Buat Pesanan",
+        "Hubungi Admin"
+      ]
+    },
+    {
+      "page": "Form Pemesanan",
+      "description": "Guest dapat memesan layanan laundry tanpa login.",
+      "fields": [
+        "Nama Pelanggan",
+        "Nomor WA",
+        "Alamat",
+        "Jenis Layanan",
+        "Berat / Jumlah",
+        "Catatan Opsional"
+      ],
+      "cta": [
+        "Kirim Pesanan",
+        "Reset Form",
+        "Kembali"
+      ]
+    },
+    {
+      "page": "Pesanan Berhasil",
+      "description": "Halaman setelah guest sukses memesan laundry.",
+      "info": [
+        "Nomor Order",
+        "Estimasi Selesai",
+        "Total Harga",
+        "Tombol Simpan/Download Struk"
+      ],
+      "cta": [
+        "Cek Status Laundry",
+        "Kembali ke Home"
+      ]
+    },
+    {
+      "page": "Tracking Laundry",
+      "description": "Guest bisa mengecek progres laundry menggunakan nomor order.",
+      "fields": [
+        "Masukkan Nomor Order"
+      ],
+      "cta": [
+        "Cek Status",
+        "Kembali"
+      ],
+      "status_view": [
+        "Diterima",
+        "Dicuci",
+        "Dijemur",
+        "Disetrika",
+        "Siap Diambil / Diantar"
+      ]
+    },
+    {
+      "page": "Halaman Promo",
+      "description": "Guest melihat promo atau diskon yang sedang berlaku.",
+      "cta": [
+        "Gunakan Promo (Khusus Guest Pesanan Baru)",
+        "Kembali"
+      ]
+    },
+    {
+      "page": "Halaman Kontak / Hubungi Admin",
+      "description": "Menampilkan informasi kontak admin.",
+      "contact_method": [
+        "Tombol Chat WA",
+        "Tombol Telepon",
+        "Google Maps Lokasi Laundry"
+      ],
+      "cta": [
+        "Kembali"
+      ]
+    },
+    {
+      "page": "Tentang Kami",
+      "description": "Informasi tentang profil laundry.",
+      "cta": [
+        "Kembali"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "name": "Guest membuat pesanan",
+      "steps": [
+        "Guest membuka landing page",
+        "Guest klik 'Buat Pesanan'",
+        "Guest mengisi form pemesanan",
+        "Guest klik 'Kirim Pesanan'",
+        "Sistem membuat order dan mengirim nomor order",
+        "Guest diarahkan ke halaman 'Pesanan Berhasil'"
+      ],
+      "goal": "Memungkinkan pelanggan memesan laundry tanpa akun."
+    },
+    {
+      "name": "Guest melihat harga laundry",
+      "steps": [
+        "Guest membuka landing page",
+        "Klik 'Lihat Daftar Harga'",
+        "Melihat layanan dan harga",
+        "Memutuskan untuk lanjut memesan"
+      ],
+      "goal": "Memberikan transparansi harga untuk meningkatkan kepercayaan pelanggan."
+    },
+    {
+      "name": "Guest cek status laundry",
+      "steps": [
+        "Guest membuka halaman tracking",
+        "Menginput nomor order",
+        "Sistem menampilkan status laundry",
+        "Guest bisa cek progres hingga selesai"
+      ],
+      "goal": "Memudahkan pelanggan memantau status laundry tanpa login."
+    },
+    {
+      "name": "Guest melihat promo",
+      "steps": [
+        "Guest membuka halaman promo",
+        "Melihat daftar promo",
+        "Jika ada promo yang berlaku, bisa dipakai saat membuat pesanan"
+      ],
+      "goal": "Menaikkan engagement pelanggan baru."
+    },
+    {
+      "name": "Guest menghubungi admin",
+      "steps": [
+        "Guest membuka menu 'Hubungi Admin'",
+        "Klik tombol chat WA atau telepon",
+        "Terhubung langsung ke admin"
+      ],
+      "goal": "Memberikan akses komunikasi langsung untuk pertanyaan atau komplain."
+    }
+  ]
+}

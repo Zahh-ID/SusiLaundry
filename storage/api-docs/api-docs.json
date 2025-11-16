@@ -1,0 +1,357 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Susi Laundry API",
+        "description": "API for Susi Laundry Information System",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/admin/orders": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Display a listing of the orders.",
+                "operationId": "4f25aaaba8e57cb81f72e10061f0a88d",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/admin/orders/{order}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Display the specified order.",
+                "operationId": "6fb424f1f57d56ff16c4198168171991",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update the specified order in storage.",
+                "operationId": "cf375e497728e96c2f29dd8cbee7f1c7",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "actual_weight": {
+                                        "type": "number"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    },
+                                    "total_price": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Remove the specified order from storage.",
+                "operationId": "a14db7138846a99728320e87fb3943f1",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/paket": {
+            "get": {
+                "tags": [
+                    "Guest"
+                ],
+                "summary": "Display a listing of the packages.",
+                "operationId": "3ee648f705f61678d075150c2f258195",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/order/store": {
+            "post": {
+                "tags": [
+                    "Guest"
+                ],
+                "summary": "Store a newly created order in storage.",
+                "operationId": "15446c5d9a17252bdb90675680c62d3e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "phone",
+                                    "address",
+                                    "package_id",
+                                    "estimated_weight",
+                                    "service_type"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "package_id": {
+                                        "type": "integer"
+                                    },
+                                    "estimated_weight": {
+                                        "type": "number"
+                                    },
+                                    "service_type": {
+                                        "type": "string"
+                                    },
+                                    "notes": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/tracking/{kode}": {
+            "get": {
+                "tags": [
+                    "Guest"
+                ],
+                "summary": "Track an order by its code.",
+                "operationId": "e2f5426634f7016d87d7dc5bf578fd2e",
+                "parameters": [
+                    {
+                        "name": "kode",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/admin/packages": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Display a listing of the packages.",
+                "operationId": "b7da578fb60ef7bdd04525c41ba02820",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Store a newly created package in storage.",
+                "operationId": "faec8cf8659b3c9850d6b73f590e653b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "package_name",
+                                    "description",
+                                    "price_per_kg"
+                                ],
+                                "properties": {
+                                    "package_name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "price_per_kg": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/admin/packages/{package}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Display the specified package.",
+                "operationId": "34337ea68c0457dc7ba0147d319fd829",
+                "parameters": [
+                    {
+                        "name": "package",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update the specified package in storage.",
+                "operationId": "5fdb723cc2ce63d6bac4c8c1b8a98481",
+                "parameters": [
+                    {
+                        "name": "package",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "package_name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "price_per_kg": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Remove the specified package from storage.",
+                "operationId": "98b630e2d17eda558222b49bd01a7f9e",
+                "parameters": [
+                    {
+                        "name": "package",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Admin",
+            "description": "Admin"
+        },
+        {
+            "name": "Guest",
+            "description": "Guest"
+        }
+    ]
+}

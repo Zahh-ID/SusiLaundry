@@ -1,0 +1,197 @@
+{
+  "admin_role": {
+    "description": "Admin sebagai pengelola penuh sistem laundry dengan akses CRUD dan operasional.",
+    "utilities": {
+      "dashboard": {
+        "description": "Halaman utama admin untuk melihat ringkasan operasional.",
+        "features": [
+          "Statistik pesanan (hari ini, minggu ini, bulan ini)",
+          "Status pesanan (Diterima, Dicuci, Selesai, Diambil)",
+          "Grafik transaksi",
+          "Pendapatan bulanan",
+          "Quick action (shortcut ke tambah pesanan, daftar harga)"
+        ],
+        "cta": [
+          "Kelola Pesanan",
+          "Tambah Pesanan Manual",
+          "Kelola Harga & Layanan",
+          "Laporan Transaksi",
+          "Logout"
+        ]
+      },
+
+      "pesanan": {
+        "module": "CRUD Pesanan Laundry",
+        "description": "Admin mengelola seluruh pesanan pelanggan baik online maupun offline.",
+        "fields": [
+          "nama_pelanggan",
+          "nomor_hp",
+          "alamat",
+          "jenis_layanan",
+          "berat_estimasi",
+          "berat_final",
+          "harga_total",
+          "catatan",
+          "status_pesanan"
+        ],
+        "actions": {
+          "create": "Admin menambah pesanan baru (offline customer).",
+          "read": "Melihat semua pesanan dalam tabel.",
+          "update": "Mengubah data pesanan.",
+          "delete": "Menghapus pesanan.",
+          "search": "Pencarian berdasarkan nama atau nomor pesanan.",
+          "filter": "Filter by status, tanggal, layanan.",
+          "print": "Cetak nota pesanan.",
+          "export": "Export data pesanan ke Excel."
+        },
+        "status_flow": [
+          "Menunggu Konfirmasi",
+          "Diterima",
+          "Dicuci",
+          "Dikeringkan",
+          "Disetrika",
+          "Siap Diambil",
+          "Selesai",
+          "Diambil"
+        ],
+        "cta": [
+          "Detail",
+          "Edit",
+          "Hapus",
+          "Update Status",
+          "Hitung Harga",
+          "Print Nota",
+          "Kembali"
+        ]
+      },
+
+      "layanan": {
+        "module": "CRUD Daftar Layanan & Harga",
+        "description": "Admin mengatur list layanan laundry dan harga.",
+        "fields": [
+          "nama_layanan",
+          "jenis (per_kg/per_item/paket)",
+          "harga",
+          "deskripsi",
+          "durasi_pengerjaan"
+        ],
+        "actions": {
+          "create": "Tambah layanan baru.",
+          "read": "Melihat tabel layanan.",
+          "update": "Edit layanan dan harga.",
+          "delete": "Hapus layanan.",
+          "search": "Cari berdasarkan nama layanan.",
+          "sort": "Urutkan berdasarkan harga atau nama."
+        },
+        "cta": [
+          "Tambah Layanan",
+          "Edit",
+          "Hapus",
+          "Simpan",
+          "Kembali"
+        ]
+      },
+
+      "kategori_laundry": {
+        "module": "CRUD Kategori Laundry (opsional)",
+        "description": "Kategori item seperti karpet, boneka, sepatu.",
+        "fields": [
+          "nama_kategori",
+          "deskripsi"
+        ],
+        "actions": {
+          "create": "Tambahkan kategori baru.",
+          "read": "Lihat daftar kategori.",
+          "update": "Edit nama/deskripsi kategori.",
+          "delete": "Hapus kategori."
+        }
+      },
+
+      "pelanggan": {
+        "module": "CRUD Data Pelanggan",
+        "description": "Admin dapat mengelola database pelanggan.",
+        "fields": [
+          "nama",
+          "nomor_hp",
+          "alamat",
+          "riwayat_order"
+        ],
+        "actions": {
+          "create": "Tambah pelanggan baru (opsional).",
+          "read": "Lihat daftar pelanggan.",
+          "update": "Edit data pribadi pelanggan.",
+          "delete": "Hapus pelanggan.",
+          "search": "Cari nama atau nomor telepon.",
+          "view_order_history": "Lihat riwayat order pelanggan."
+        }
+      },
+
+      "pickup_delivery": {
+        "module": "CRUD Pickup & Delivery (opsional)",
+        "description": "Jika laundry menyediakan layanan antar-jemput.",
+        "fields": [
+          "nama_kurir",
+          "kontak",
+          "jadwal",
+          "status"
+        ],
+        "actions": {
+          "assign": "Memberikan pesanan ke kurir.",
+          "update": "Mengubah status pengantaran.",
+          "delete": "Menghapus data kurir."
+        }
+      },
+
+      "user_admin": {
+        "module": "CRUD Admin User (opsional)",
+        "description": "Manajemen akun admin atau petugas laundry.",
+        "fields": [
+          "nama_admin",
+          "email",
+          "role",
+          "password"
+        ],
+        "actions": {
+          "create": "Tambah akun admin baru.",
+          "read": "Melihat daftar admin.",
+          "update": "Edit data admin.",
+          "delete": "Hapus admin."
+        }
+      },
+
+      "laporan": {
+        "module": "Laporan Transaksi",
+        "description": "Laporan berdasarkan tanggal, status, atau pendapatan.",
+        "outputs": [
+          "Laporan excel",
+          "Laporan PDF",
+          "Grafik transaksi",
+          "Statistik pesanan"
+        ],
+        "actions": {
+          "filter": "Filter laporan berdasarkan rentang tanggal.",
+          "export": "Export laporan ke Excel.",
+          "print": "Print laporan."
+        },
+        "cta": [
+          "Filter Tanggal",
+          "Cetak",
+          "Export Excel",
+          "Kembali"
+        ]
+      },
+
+      "utility_lain": {
+        "description": "Fitur pendukung tambahan.",
+        "features": [
+          "Notifikasi status pesanan",
+          "Auto-generate nomor pesanan",
+          "Backup database",
+          "Restore database",
+          "Activity log (riwayat tindakan admin)",
+          "Dark mode (opsional)"
+        ]
+      }
+    }
+  }
+}
