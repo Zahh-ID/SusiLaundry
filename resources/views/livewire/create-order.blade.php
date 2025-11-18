@@ -77,19 +77,6 @@
                     @error('service_type') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <div>
-                <p class="text-sm font-semibold text-slate-600">Metode Pembayaran</p>
-                <div class="mt-3 flex flex-col gap-2 sm:flex-row">
-                    @foreach($paymentMethods as $key => $label)
-                        <label class="flex flex-1 items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary">
-                            <input type="radio" class="text-primary focus:ring-primary" wire:model.defer="payment_method" value="{{ $key }}">
-                            <span>{{ $label }}</span>
-                        </label>
-                    @endforeach
-                </div>
-                @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                <p class="mt-2 text-xs text-slate-500">QRIS otomatis dikirim setelah form terkirim. Pembayaran cash dilakukan saat kurir menjemput.</p>
-            </div>
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
                     <label for="pickup_or_delivery" class="text-sm font-semibold text-slate-600">Pickup / Delivery</label>
@@ -112,8 +99,9 @@
                 @error('notes') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
             <div class="flex flex-col gap-3 md:flex-row">
-                <button type="submit" class="flex-1 rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
-                    Kirim Pemesanan
+                <button type="submit" class="flex-1 rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Kirim Pemesanan</span>
+                    <span wire:loading>Memproses...</span>
                 </button>
                 <button type="button" wire:click="resetForm" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 hover:border-primary hover:text-primary">
                     Reset Form

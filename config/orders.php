@@ -2,19 +2,16 @@
 
 return [
     'order_statuses' => [
-        'order_created' => 'Order Dibuat',
-        'accepted' => 'Diterima',
-        'weight_set' => 'Berat Ditetapkan',
-        'waiting_payment' => 'Menunggu Pembayaran',
-        'paid' => 'Pembayaran Diterima',
-        'washing' => 'Dicuci',
-        'drying' => 'Dikeringkan',
-        'ironing' => 'Disetrika',
-        'packing' => 'Dikemas',
+        'pending_confirmation' => 'Menunggu Konfirmasi',
+        'processing' => 'Diproses',
         'ready_for_pickup' => 'Siap Diambil',
-        'out_for_delivery' => 'Sedang Diantar',
-        'completed' => 'Selesai',
-        'cancelled' => 'Dibatalkan',
+        'taken' => 'Diambil',
+    ],
+    'order_status_flow' => [
+        'pending_confirmation',
+        'processing',
+        'ready_for_pickup',
+        'taken',
     ],
     'payment_statuses' => [
         'pending' => 'Menunggu',
@@ -32,8 +29,9 @@ return [
         'pickup' => 'Pickup oleh Kurir',
         'delivery' => 'Antar ke Pelanggan',
     ],
+    'inactive_statuses' => ['taken', 'cancelled'],
     'weight_discrepancy_threshold_percent' => 40,
-    'qris_expiry_minutes' => 30,
+    'qris_expiry_minutes' => 10,
     'max_active_orders_per_phone' => 3,
     'max_qris_regenerations_per_order_per_day' => 3,
 ];

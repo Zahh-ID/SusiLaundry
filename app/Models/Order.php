@@ -77,4 +77,17 @@ class Order extends Model
         $this->activity_log = $log;
         $this->save();
     }
+
+    public function nextStatus(): ?string
+    {
+        $flow = static::statusFlow();
+        $index = array_search($this->status, $flow, true);
+
+        return $index === false ? null : ($flow[$index + 1] ?? null);
+    }
+
+    public static function statusFlow(): array
+    {
+        return config('orders.order_status_flow', []);
+    }
 }

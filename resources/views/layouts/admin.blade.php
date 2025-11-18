@@ -62,5 +62,6 @@
         </div>
 
         @livewireScripts
+        @livewire('admin.order.modal')
     </body>
 </html>

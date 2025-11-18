@@ -11,6 +11,16 @@ class TrackOrder extends Component
     public $order;
     public $errorMessage;
 
+    public function mount(): void
+    {
+        $code = request()->query('code');
+
+        if ($code) {
+            $this->order_code = $code;
+            $this->track();
+        }
+    }
+
     public function track()
     {
         $this->validate([

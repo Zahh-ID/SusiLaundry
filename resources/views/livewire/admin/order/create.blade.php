@@ -63,14 +63,9 @@
                     <input type="number" step="0.5" wire:model.defer="estimated_weight" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     @error('estimated_weight') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
-                <div>
-                    <label class="text-sm font-semibold text-slate-600">Status Pesanan</label>
-                    <select wire:model.defer="status" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        @foreach($statuses as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('status') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    Status awal pesanan akan otomatis menjadi
+                    <span class="font-semibold text-slate-900">{{ $initialStatusLabel }}</span> dan hanya bisa maju sesuai alur.
                 </div>
             </div>
             <div>
@@ -83,6 +78,7 @@
                         </label>
                     @endforeach
                 </div>
+                <p class="mt-2 text-xs text-slate-500">Pembayaran QRIS akan membuka popup Midtrans dan pesanan tersimpan setelah lunas.</p>
                 @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
             <div class="grid gap-4 md:grid-cols-2">
@@ -104,9 +100,46 @@
                 <label class="text-sm font-semibold text-slate-600">Catatan</label>
                 <textarea wire:model.defer="notes" rows="3" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
             </div>
-            <button type="submit" class="w-full rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
-                Simpan Pesanan
+            <button type="submit" class="w-full rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600" wire:loading.attr="disabled">
+                <span wire:loading.remove>Buat Pesanan</span>
+                <span wire:loading>Memproses...</span>
             </button>
         </form>
     </div>
+</div>
+
+@if($showQrisModal && $pendingQrisPayload)
+    @php
+        $expiryTimestamp = isset($pendingQrisPayload['expiry']) ? \Illuminate\Support\Carbon::parse($pendingQrisPayload['expiry'])->timestamp : null;
+    @endphp
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+        <div class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl" wire:poll.4s="checkPendingPaymentStatus">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm font-semibold text-primary">Pembayaran QRIS</p>
+                    <h2 class="text-2xl font-bold text-slate-900">Scan &amp; Konfirmasi</h2>
+                    <p class="text-sm text-slate-500">Pesanan tersimpan otomatis ketika Midtrans mengonfirmasi pembayaran.</p>
+                </div>
+                <button type="button" class="text-sm font-semibold text-slate-500 hover:text-primary" wire:click="cancelPendingQris">Tutup</button>
+            </div>
+            <div class="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p class="text-xs font-semibold uppercase text-slate-400">Jumlah</p>
+                <p class="text-2xl font-bold text-slate-900">Rp {{ number_format($pendingQrisPayload['amount'] ?? 0, 0, ',', '.') }}</p>
+            </div>
+            <div class="mt-4 flex flex-col items-center gap-3">
+                <img src="{{ $pendingQrisPayload['qris_image_url'] ?? '' }}" alt="QRIS" class="h-48 w-48 rounded-2xl border border-slate-100 object-contain">
+                <a href="{{ $pendingQrisPayload['qris_url'] ?? '#' }}" target="_blank" class="text-sm font-semibold text-primary hover:text-indigo-600">Buka QR di tab baru</a>
+                <div class="text-center text-xs text-slate-500" x-data="{ expires: {{ $expiryTimestamp ?? 'null' }}, remaining: '10:00' }" x-init="if (expires) { const update = () => { const diff = (expires * 1000) - Date.now(); remaining = diff <= 0 ? '00:00' : new Date(diff).toISOString().slice(14, 19); }; update(); setInterval(update, 1000); }">
+                    Sisa waktu pembayaran <span class="font-semibold text-slate-900" x-text="remaining"></span>
+                </div>
+            </div>
+            <div class="mt-6 space-y-3 text-sm text-slate-600">
+                <p>Setelah pelanggan membayar, status akan terdeteksi otomatis. Jika timer habis atau pembayaran dibatalkan, pesanan tidak akan disimpan.</p>
+                <button type="button" class="w-full rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-600 hover:border-rose-500 hover:text-rose-500" wire:click="cancelPendingQris">
+                    Batalkan Pembayaran
+                </button>
+            </div>
+        </div>
+    </div>
+@endif
 </div>

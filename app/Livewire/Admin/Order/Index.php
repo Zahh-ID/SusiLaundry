@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Order;
 
 use App\Models\Order;
+use App\Services\WhatsappNotifier;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Index extends Component
@@ -12,12 +14,29 @@ class Index extends Component
     public $serviceTypeFilter = 'all';
     public $dateFrom;
     public $dateTo;
+    public $actual_weight;
     public array $availableStatuses = [];
+
+    public bool $showCreateModal = false;
+    public bool $showExportModal = false;
+    public bool $showAdvanceModal = false;
+    public bool $showCancelModal = false;
+
+    public ?int $advanceOrderId = null;
+    public ?string $advanceCurrentStatus = null;
+    public ?string $advanceNextStatus = null;
+    public array $advanceSummary = [];
+
+    public ?int $cancelOrderId = null;
+    public array $cancelSummary = [];
+
+    public function mount(): void
+    {
+        $this->availableStatuses = config('orders.order_statuses', []);
+    }
 
     public function render()
     {
-        $this->availableStatuses = config('orders.order_statuses');
-
         $orders = Order::with(['customer', 'package'])
             ->when($this->statusFilter !== 'all', fn ($query) => $query->where('status', $this->statusFilter))
             ->when($this->serviceTypeFilter !== 'all', fn ($query) => $query->where('service_type', $this->serviceTypeFilter))
@@ -36,6 +55,181 @@ class Index extends Component
 
         return view('livewire.admin.order.index', [
             'orders' => $orders,
+            'statusLabels' => collect(['all' => 'Semua'])->merge($this->availableStatuses),
         ])->layout('layouts.admin', ['title' => 'Daftar Transaksi']);
+    }
+
+    public function openCreateModal(): void
+    {
+        $this->showCreateModal = true;
+    }
+
+    public function closeCreateModal(): void
+    {
+        $this->showCreateModal = false;
+    }
+
+    public function confirmCreate()
+    {
+        $this->closeCreateModal();
+        return redirect()->route('admin.orders.create');
+    }
+
+    public function openExportModal(): void
+    {
+        $this->showExportModal = true;
+    }
+
+    public function closeExportModal(): void
+    {
+        $this->showExportModal = false;
+    }
+
+    public function confirmExport()
+    {
+        $params = array_filter([
+            'status' => $this->statusFilter !== 'all' ? $this->statusFilter : null,
+            'service_type' => $this->serviceTypeFilter !== 'all' ? $this->serviceTypeFilter : null,
+            'date_from' => $this->dateFrom,
+            'date_to' => $this->dateTo,
+        ], fn ($value) => $value !== null);
+
+        $this->closeExportModal();
+        return redirect()->route('admin.reports.orders.export', $params);
+    }
+
+    public function openAdvanceModal(int $orderId): void
+    {
+        $order = Order::with(['customer', 'package'])->findOrFail($orderId);
+        $nextStatus = $order->nextStatus();
+
+        if (! $nextStatus) {
+            session()->flash('error', 'Pesanan sudah berada di status akhir.');
+            return;
+        }
+
+        $this->advanceOrderId = $orderId;
+        $this->advanceCurrentStatus = $order->status;
+        $this->advanceNextStatus = $nextStatus;
+        $this->actual_weight = $order->actual_weight ?? $order->estimated_weight;
+        $this->advanceSummary = [
+            'Kode' => $order->order_code,
+            'Pelanggan' => $order->customer?->name ?? 'Tanpa Nama',
+            'Paket' => ($order->package?->package_name ?? '-') .' • '. ucfirst($order->service_type),
+            'Berat' => number_format($this->actual_weight ?? 0, 1).' kg',
+            'Total' => 'Rp '.number_format($order->total_price ?? 0, 0, ',', '.'),
+            'Status berikutnya' => $this->availableStatuses[$nextStatus] ?? ucfirst($nextStatus),
+        ];
+
+        $this->showAdvanceModal = true;
+    }
+
+    public function closeAdvanceModal(): void
+    {
+        $this->showAdvanceModal = false;
+        $this->advanceOrderId = null;
+        $this->advanceCurrentStatus = null;
+        $this->advanceNextStatus = null;
+        $this->advanceSummary = [];
+        $this->resetErrorBag('actual_weight');
+    }
+
+    public function confirmAdvanceWithWeight(): void
+    {
+        if (! $this->advanceOrderId) {
+            return;
+        }
+
+        $this->validate([
+            'actual_weight' => 'required|numeric|min:0.1',
+        ]);
+
+        $order = Order::with('package')->findOrFail($this->advanceOrderId);
+        $order->actual_weight = $this->actual_weight;
+
+        if (! $order->price_per_kg && $order->package) {
+            $order->price_per_kg = $order->package->price_per_kg;
+        }
+
+        if ($order->price_per_kg) {
+            $order->total_price = $this->actual_weight * $order->price_per_kg;
+        }
+
+        $order->save();
+
+        $this->confirmAdvance();
+    }
+
+    public function confirmAdvance(): void
+    {
+        if (! $this->advanceOrderId) {
+            return;
+        }
+
+        $order = Order::findOrFail($this->advanceOrderId);
+        $nextStatus = $order->nextStatus();
+
+        if (! $nextStatus) {
+            session()->flash('error', 'Pesanan sudah berada di status akhir.');
+            $this->closeAdvanceModal();
+            return;
+        }
+
+        DB::transaction(function () use ($order, $nextStatus) {
+            $order->status = $nextStatus;
+            $order->save();
+
+            $order->appendActivity('admin', 'status_progressed', [
+                'status' => $nextStatus,
+            ]);
+        });
+
+        app(WhatsappNotifier::class)->notifyStatusUpdated($order->fresh('customer', 'package'));
+
+        session()->flash('message', 'Pesanan bergerak ke status '.($this->availableStatuses[$nextStatus] ?? ucfirst($nextStatus)).'.');
+        $this->closeAdvanceModal();
+    }
+
+    public function openCancelModal(int $orderId): void
+    {
+        $order = Order::with('customer')->findOrFail($orderId);
+        $this->cancelOrderId = $orderId;
+        $this->cancelSummary = [
+            'Kode' => $order->order_code,
+            'Pelanggan' => $order->customer?->name ?? 'Tanpa Nama',
+            'Status' => $this->availableStatuses[$order->status] ?? ucfirst($order->status),
+        ];
+        $this->showCancelModal = true;
+    }
+
+    public function closeCancelModal(): void
+    {
+        $this->showCancelModal = false;
+        $this->cancelOrderId = null;
+        $this->cancelSummary = [];
+    }
+
+    public function confirmCancel(): void
+    {
+        if (! $this->cancelOrderId) {
+            return;
+        }
+
+        $order = Order::findOrFail($this->cancelOrderId);
+        $inactive = config('orders.inactive_statuses', []);
+        if (in_array($order->status, array_merge($inactive, ['cancelled']), true)) {
+            session()->flash('error', 'Pesanan sudah tidak aktif.');
+            $this->closeCancelModal();
+            return;
+        }
+
+        $order->status = 'cancelled';
+        $order->save();
+
+        $order->appendActivity('admin', 'order_cancelled', []);
+        app(WhatsappNotifier::class)->notifyStatusUpdated($order->fresh('customer', 'package'));
+
+        session()->flash('message', 'Pesanan dibatalkan.');
+        $this->closeCancelModal();
     }
 }

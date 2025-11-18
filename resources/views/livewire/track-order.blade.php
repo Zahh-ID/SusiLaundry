@@ -1,7 +1,8 @@
 @php
-    $trackingSteps = ['Diterima', 'Dicuci', 'Dijemur', 'Disetrika', 'Siap Diambil / Diantar'];
-    $timelineSteps = array_merge(['Menunggu Konfirmasi'], $trackingSteps);
-    $statusIndex = $order ? collect($timelineSteps)->search(fn ($label) => strtolower($label) === strtolower($order->status)) : -1;
+    $statusMap = config('orders.order_statuses');
+    $statusKeys = array_keys($statusMap);
+    $timelineSteps = array_values($statusMap);
+    $statusIndex = $order ? array_search($order->status, $statusKeys, true) : -1;
 @endphp
 <div class="mx-auto grid w-full max-w-6xl gap-10 px-6 py-16 lg:grid-cols-2">
     <div>
@@ -46,12 +47,15 @@
 
         @if ($order)
             @php
-                $progressSteps = ['Menunggu Konfirmasi', 'Diterima', 'Dicuci', 'Dikeringkan', 'Disetrika', 'Siap Diambil / Diantar', 'Selesai'];
-                $activeIndex = collect($progressSteps)->search(function ($label) use ($order) {
-                    return strtolower($label) === strtolower($order->status);
-                });
+                $progressSteps = $timelineSteps;
+                $activeIndex = array_search($order->status, $statusKeys, true);
             @endphp
             <div class="mt-6 space-y-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-5 text-sm text-slate-600">
+                @if($order->payment_method === 'qris' && $order->payment_status !== 'paid')
+                    <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+                        Silakan selesaikan pembayaran terlebih dahulu untuk melanjutkan proses pengambilan.
+                    </div>
+                @endif
                 <div>
                     <p class="text-xs uppercase text-slate-400">Kode Pesanan</p>
                     <p class="text-2xl font-bold tracking-wide text-slate-900">{{ $order->order_code }}</p>
@@ -115,6 +119,7 @@
                             <a href="{{ $pendingPayment->qris_url }}" target="_blank" class="mt-3 inline-flex items-center justify-center rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white">
                                 Buka QRIS
                             </a>
+                            <p class="mt-2 text-xs text-slate-500">Status akan diperbarui otomatis setelah pembayaran terkonfirmasi.</p>
                         </div>
                     @endif
                 @else

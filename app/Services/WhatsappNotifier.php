@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -45,6 +46,38 @@ class WhatsappNotifier
             $order->status_label,
             $order->payment_status_label,
             number_format($order->total_price ?? 0, 0, ',', '.')
+        );
+
+        $this->sendText($order->customer?->phone, $message);
+    }
+
+    public function notifyPaymentRequest(Order $order, Payment $payment, string $trackingUrl): void
+    {
+        if (! $this->enabled()) {
+            return;
+        }
+
+        $message = sprintf(
+            "Pesanan %s siap diproses dengan berat %.1f kg. Total Rp %s. Buka tautan berikut untuk melihat progres dan bayar via QRIS: %s\nQR berlaku hingga %s.",
+            $order->order_code,
+            $order->actual_weight ?? $order->estimated_weight ?? 0,
+            number_format($payment->amount ?? 0, 0, ',', '.'),
+            $trackingUrl,
+            optional($payment->expiry_time)->translatedFormat('d M Y H:i') ?? '-'
+        );
+
+        $this->sendText($order->customer?->phone, $message);
+    }
+
+    public function notifyPaymentSuccess(Order $order): void
+    {
+        if (! $this->enabled()) {
+            return;
+        }
+
+        $message = sprintf(
+            "Pembayaran untuk pesanan %s berhasil. Kami lanjutkan proses laundry dan akan mengabari saat siap diambil.",
+            $order->order_code
         );
 
         $this->sendText($order->customer?->phone, $message);
