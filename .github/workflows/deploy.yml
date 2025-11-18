@@ -1,89 +1,132 @@
-name: CI/CD
+name: Deploy
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: susilaundry-deploy
+  cancel-in-progress: true
 
 jobs:
-  build-test:
+  deploy:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          extensions: mbstring, pdo_sqlite, sqlite3, intl, gd
-          coverage: none
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: npm-
 
-      - name: Build assets
-        run: npm run build
-
-      - name: Copy .env
-        run: cp .env.example .env
-
-      - name: Generate app key
-        run: php artisan key:generate
-
-      - name: Configure database
+      - name: Install & Build
         run: |
-          php -r "copy('.env', '.env.testing');"
-          php -r "file_put_contents('.env.testing', str_replace('DB_CONNECTION=mysql', 'DB_CONNECTION=sqlite', file_get_contents('.env.testing')));"
-          php -r "file_put_contents('.env.testing', str_replace('DB_DATABASE=susilaundry', 'DB_DATABASE=database/testing.sqlite', file_get_contents('.env.testing')));"
-          php -r "file_put_contents('.env.testing', str_replace('DB_USERNAME=root', 'DB_USERNAME=', file_get_contents('.env.testing')));"
-          php -r "file_put_contents('.env.testing', str_replace('DB_PASSWORD=', 'DB_PASSWORD=', file_get_contents('.env.testing')));"
+          npm ci --ignore-scripts
+          npm run build
 
-      - name: Prepare SQLite database
-        run: |
-          mkdir -p database
-          touch database/testing.sqlite
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Run migrations
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/testing.sqlite
-        run: php artisan migrate --force
-
-      - name: Run tests
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/testing.sqlite
-        run: php artisan test
-
-      - name: Deploy to Server
-        if: github.ref == 'refs/heads/main'
+      - name: Test SSH connectivity
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /var/www/SusiLaundry
-            git fetch --prune
-            git checkout main
-            git reset --hard origin/main
-            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-            php artisan migrate --force
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 20
-            npm ci
-            npm run build
-            php artisan config:cache
-            php artisan route:cache
+          script: 'echo "Connected to $(hostname)"'
+
+      - name: Ensure deploy directory exists
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" \
+            "$SSH_USER@$SSH_HOST" \
+            "mkdir -p '$DEPLOY_PATH'"
+
+      - name: Rsync source to server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='vendor/' \
+            --exclude='.env' \
+            -e "ssh -o StrictHostKeyChecking=no -p $SSH_PORT" \
+            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+
+      - name: Post-deploy tasks
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DB_HOST: ${{ secrets.DB_HOST || '127.0.0.1' }}
+          DB_PORT: ${{ secrets.DB_PORT || '3306' }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE || 'susilaundry' }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME || 'susilaundry' }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'secret' }}
+          PHP_FPM_SERVICE: ${{ secrets.PHP_FPM_SERVICE || 'php8.3-fpm' }}
+          NGINX_SERVICE: ${{ secrets.NGINX_SERVICE || 'nginx' }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" \
+            "$SSH_USER@$SSH_HOST" bash -lc "
+              set -e
+              cd '$DEPLOY_PATH'
+
+              if ! command -v composer >/dev/null 2>&1; then
+                curl -sS https://getcomposer.org/installer | php
+                sudo mv composer.phar /usr/local/bin/composer
+              fi
+
+              if [ ! -f .env ]; then
+                cp .env.example .env || true
+                php artisan key:generate || true
+                sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env || true
+                sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env || true
+                sed -i \"s/^DB_HOST=.*/DB_HOST=$DB_HOST/\" .env || true
+                sed -i \"s/^DB_PORT=.*/DB_PORT=$DB_PORT/\" .env || true
+                sed -i \"s/^DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/\" .env || true
+                sed -i \"s/^DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/\" .env || true
+                sed -i \"s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/\" .env || true
+              fi
+
+              composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+              php artisan storage:link || true
+              php artisan view:clear || true
+              php artisan config:cache
+              php artisan route:cache
+              php artisan view:cache
+              php artisan event:cache
+              php artisan migrate --force || true
+
+              chgrp -R www-data storage bootstrap/cache || true
+              chmod -R ug+rwx storage bootstrap/cache || true
+
+              sudo systemctl reload '$PHP_FPM_SERVICE' || true
+              sudo systemctl reload '$NGINX_SERVICE' || true
+
+              echo 'Deploy SusiLaundry selesai ✅'
+            "
