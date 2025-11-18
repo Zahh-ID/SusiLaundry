@@ -13,6 +13,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.SSH_HOST }}
+      DEPLOY_USER: ${{ secrets.SSH_USER }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_PORT: ${{ secrets.SSH_PORT != '' && secrets.SSH_PORT || '22' }}
 
     steps:
       - name: Checkout
@@ -43,17 +48,17 @@ jobs:
       - name: Test SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          port: ${{ secrets.SSH_PORT }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          port: ${{ env.DEPLOY_PORT }}
           key: ${{ secrets.SSH_KEY }}
           script: 'echo "OK $(hostname)"; uname -a'
 
       - name: Ensure target dir exists
         run: |
-          ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" \
-            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
-            "mkdir -p '${{ secrets.DEPLOY_PATH }}'"
+          ssh -o StrictHostKeyChecking=no -p "$DEPLOY_PORT" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "mkdir -p '$DEPLOY_PATH'"
 
       - name: Rsync source to server
         run: |
@@ -63,15 +68,15 @@ jobs:
             --exclude='node_modules/' \
             --exclude='vendor/' \
             --exclude='.env' \
-            -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" \
-            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}"
+            -e "ssh -o StrictHostKeyChecking=no -p $DEPLOY_PORT" \
+            ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
 
       - name: Post-deploy tasks
         run: |
-          ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" \
-            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -lc "
+          ssh -o StrictHostKeyChecking=no -p "$DEPLOY_PORT" \
+            "$DEPLOY_USER@$DEPLOY_HOST" bash -lc "
               set -e
-              cd '${{ secrets.DEPLOY_PATH }}'
+              cd '$DEPLOY_PATH'
 
               if ! command -v composer >/dev/null 2>&1; then
                 curl -sS https://getcomposer.org/installer | php
