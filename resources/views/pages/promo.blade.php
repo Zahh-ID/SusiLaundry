@@ -40,7 +40,7 @@
                     </div>
                     <div class="mt-6 flex items-center gap-3">
                         @if($promo['code'])
-                            <span class="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white">
+                            <span class="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-slate-900">
                                 Kode: {{ $promo['code'] }}
                             </span>
                         @endif
@@ -55,7 +55,7 @@
             Syarat & ketentuan berlaku. Promo hanya berlaku untuk Guest dan tidak dapat digabung dengan promo lain.
         </div>
         <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <a href="{{ route('order.create') }}" class="rounded-2xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">Buat Pesanan</a>
+            <a href="{{ route('order.create') }}" class="rounded-2xl border border-primary bg-primary px-5 py-3 text-center text-sm font-semibold text-white">Buat Pesanan</a>
             <a href="{{ route('landing') }}" class="rounded-2xl border border-slate-200 px-5 py-3 text-center text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">Kembali</a>
         </div>
     </section>

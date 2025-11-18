@@ -104,7 +104,7 @@
                 <label class="text-sm font-semibold text-slate-600">Catatan</label>
                 <textarea wire:model.defer="notes" rows="3" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
             </div>
-            <button type="submit" class="w-full rounded-2xl bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
+            <button type="submit" class="w-full rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
                 Simpan Pesanan
             </button>
         </form>

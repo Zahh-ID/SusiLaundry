@@ -6,7 +6,7 @@
             <p class="text-sm text-slate-500">Tambah, ubah, atau hapus paket yang tampil di halaman guest.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('admin.packages.create') }}" class="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
+            <a href="{{ route('admin.packages.create') }}" class="rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
                 Tambah Paket
             </a>
         </div>

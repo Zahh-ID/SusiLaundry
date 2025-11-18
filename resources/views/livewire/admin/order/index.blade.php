@@ -6,7 +6,7 @@
             <p class="text-sm text-slate-500">Kelola status pesanan, berat aktual, dan biaya akhir.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('admin.orders.create') }}" class="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
+            <a href="{{ route('admin.orders.create') }}" class="rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
                 Tambah Pesanan Manual
             </a>
             <a href="{{ route('admin.reports.orders.export', ['status' => $statusFilter !== 'all' ? $statusFilter : null, 'service_type' => $serviceTypeFilter !== 'all' ? $serviceTypeFilter : null, 'date_from' => $dateFrom, 'date_to' => $dateTo]) }}"

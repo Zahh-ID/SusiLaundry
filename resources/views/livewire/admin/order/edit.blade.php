@@ -130,7 +130,7 @@
                         <input type="number" step="0.1" wire:model="delivery_fee" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     </div>
                 </div>
-                <button type="submit" class="w-full rounded-2xl bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
+                <button type="submit" class="w-full rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
                     Simpan Perubahan
                 </button>
             </form>
@@ -148,14 +148,14 @@
                                 <button wire:click="regenerateQris" type="button" class="rounded-full border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10">
                                     Regenerasi QRIS
                                 </button>
-                                <button wire:click="markPaymentPaid" type="button" class="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
+                                <button wire:click="markPaymentPaid" type="button" class="rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
                                     Tandai Lunas
                                 </button>
                             </div>
                         </div>
                     @else
                         <div class="mt-4 flex gap-3">
-                            <button wire:click="markPaymentPaid" type="button" class="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
+                            <button wire:click="markPaymentPaid" type="button" class="rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600">
                                 Tandai Lunas
                             </button>
                         </div>

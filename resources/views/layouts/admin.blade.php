@@ -14,12 +14,12 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="font-sans antialiased bg-slate-900 text-slate-100 dark-theme">
+    <body class="font-sans antialiased bg-white text-slate-900">
         <div class="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
-            <aside class="border-b border-slate-800 bg-slate-900 lg:min-h-screen lg:border-b-0 lg:border-r">
+            <aside class="border-b border-slate-200 bg-white lg:min-h-screen lg:border-b-0 lg:border-r">
                 <div class="flex items-center justify-between px-6 py-5 lg:block">
                     <a href="{{ route('admin.dashboard') }}" class="text-2xl font-bold text-primary">Susi Laundry</a>
-                    <span class="text-xs font-semibold text-emerald-400 lg:hidden">Admin</span>
+                    <span class="text-xs font-semibold text-primary lg:hidden">Admin</span>
                 </div>
                 <nav class="flex gap-2 px-4 pb-6 pt-2 lg:flex-col">
                     @php
@@ -34,7 +34,7 @@
                     @foreach ($items as $item)
                         <a
                             href="{{ route($item['route']) }}"
-                            class="rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-primary/10 {{ request()->routeIs($item['route'].'*') ? 'bg-primary/10 text-primary' : 'text-slate-300' }}"
+                            class="rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-primary/10 {{ request()->routeIs($item['route'].'*') ? 'bg-primary/10 text-primary' : 'text-slate-600' }}"
                         >
                             {{ $item['label'] }}
                         </a>
@@ -42,19 +42,19 @@
                 </nav>
             </aside>
             <div class="flex min-h-screen flex-col">
-                <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 bg-slate-900 px-6 py-4">
+                <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-4">
                     <div>
-                        <p class="text-sm font-semibold text-slate-300">Halo, {{ auth()->user()->name }}</p>
+                        <p class="text-sm font-semibold text-slate-700">Halo, {{ auth()->user()->name }}</p>
                         <p class="text-xs text-slate-500">{{ auth()->user()->email }}</p>
                     </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-primary hover:text-primary">
+                        <button type="submit" class="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
                             Keluar
                         </button>
                     </form>
                 </header>
-                <main class="flex-1 bg-slate-900 px-6 py-8">
+                <main class="flex-1 bg-white px-6 py-8">
                     {{ $slot ?? '' }}
                     @yield('content')
                 </main>

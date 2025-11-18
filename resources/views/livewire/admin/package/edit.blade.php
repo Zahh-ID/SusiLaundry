@@ -45,7 +45,7 @@
                     @error('turnaround_hours') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <button type="submit" class="w-full rounded-2xl bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
+            <button type="submit" class="w-full rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
                 Update Paket
             </button>
         </form>

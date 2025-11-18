@@ -112,7 +112,7 @@
                 @error('notes') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
             <div class="flex flex-col gap-3 md:flex-row">
-                <button type="submit" class="flex-1 rounded-2xl bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
+                <button type="submit" class="flex-1 rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
                     Kirim Pemesanan
                 </button>
                 <button type="button" wire:click="resetForm" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 hover:border-primary hover:text-primary">

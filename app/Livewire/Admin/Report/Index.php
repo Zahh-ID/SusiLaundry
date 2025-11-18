@@ -13,20 +13,20 @@ class Index extends Component
 
     public function render()
     {
-        $query = Order::with(['customer', 'package'])
+        $baseQuery = Order::with(['customer', 'package'])
             ->when($this->dateFrom, fn ($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn ($q) => $q->whereDate('created_at', '<=', $this->dateTo))
             ->when($this->status !== 'all', fn ($q) => $q->where('status', $this->status));
 
-        $orders = $query->latest()->take(50)->get();
+        $orders = (clone $baseQuery)->latest()->take(50)->get();
 
         $summary = [
-            'total_orders' => $query->count(),
-            'total_weight' => $query->sum('estimated_weight'),
-            'revenue' => $query->sum('total_price'),
+            'total_orders' => (clone $baseQuery)->count(),
+            'total_weight' => (clone $baseQuery)->sum('estimated_weight'),
+            'revenue' => (clone $baseQuery)->sum('total_price'),
         ];
 
-        $statusCounts = (clone $query)
+        $statusCounts = (clone $baseQuery)
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');

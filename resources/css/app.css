@@ -1,11 +1,15 @@
 @tailwind base;
 
 @layer base {
+    body {
+        @apply bg-white text-slate-900;
+    }
+
     button,
     [type='button'],
     [type='reset'],
     [type='submit'] {
-        @apply text-slate-800;
+        @apply text-slate-800 border border-slate-300 bg-white transition-colors hover:bg-slate-50;
     }
 }
 
@@ -13,36 +17,16 @@
 
 @layer components {
 .btn {
-    @apply inline-flex items-center justify-center rounded-2xl border px-4 py-3 font-semibold transition-colors;
+    @apply inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-800 transition-colors hover:border-primary hover:text-primary;
 }
 
 .btn-primary {
-    @apply text-white bg-primary border-primary hover:bg-indigo-600 hover:border-indigo-600;
+    @apply text-white bg-primary border border-primary hover:bg-indigo-600 hover:border-indigo-600;
 }
 
 .btn-outline {
-    @apply border-slate-200 text-slate-700 hover:border-primary hover:text-primary;
+    @apply border-slate-300 text-slate-700 hover:border-primary hover:text-primary;
 }
 }
 
 @tailwind utilities;
-
-.dark-theme [class*="bg-white"] {
-    background-color: #0f172a !important;
-}
-
-.dark-theme [class*="bg-slate-50"] {
-    background-color: #0f172a !important;
-}
-
-.dark-theme [class*="text-slate-900"] {
-    color: #f8fafc !important;
-}
-
-.dark-theme [class*="text-slate-700"] {
-    color: #e2e8f0 !important;
-}
-
-.dark-theme [class*="text-slate-600"] {
-    color: #cbd5f5 !important;
-}

@@ -14,12 +14,12 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="font-sans antialiased bg-slate-900 text-slate-100 dark-theme">
+    <body class="font-sans antialiased bg-white text-slate-900">
         <div class="min-h-screen flex flex-col">
-            <header class="sticky top-0 z-30 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
+            <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
                 <div class="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
                     <a href="{{ route('landing') }}" class="text-xl font-bold text-primary">Susi Laundry</a>
-                    <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-200 md:flex">
+                    <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
                         <a href="{{ route('landing') }}#layanan" class="hover:text-primary">Layanan</a>
                         <a href="{{ route('landing') }}#paket" class="hover:text-primary">Harga</a>
                         <a href="{{ route('promo') }}" class="hover:text-primary">Promo</a>
@@ -28,10 +28,10 @@
                         <a href="{{ route('tracking') }}" class="hover:text-primary">Cek Status</a>
                     </nav>
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('tracking') }}" class="hidden rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-primary hover:text-primary md:inline-flex">
+                        <a href="{{ route('tracking') }}" class="hidden rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary md:inline-flex">
                             Cek Status
                         </a>
-                        <a href="{{ route('order.create') }}" class="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white shadow-soft hover:bg-indigo-500">
+                        <a href="{{ route('order.create') }}" class="rounded-full border border-primary bg-primary px-5 py-2 text-sm font-semibold text-white shadow-soft hover:bg-indigo-500">
                             Pesan Sekarang
                         </a>
                     </div>
@@ -43,16 +43,16 @@
                 @yield('content')
             </main>
 
-            <footer class="mt-16 border-t border-slate-800 bg-slate-900">
-                <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-10 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
+            <footer class="mt-16 border-t border-slate-200 bg-white">
+                <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-10 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
                     <p>© {{ now()->year }} Omah Susi Laundry. All rights reserved.</p>
                     <div class="flex gap-4">
-                        <a href="mailto:halo@susilaundry.id" class="hover:text-primary">halo@susilaundry.id</a>
-                        <a href="tel:+6281234567890" class="hover:text-primary">+62 812-3456-7890</a>
+                        <a href="mailto:halo@susilaundry.id" class="hover:text-primary text-slate-600">halo@susilaundry.id</a>
+                        <a href="tel:+6281234567890" class="hover:text-primary text-slate-600">+62 812-3456-7890</a>
                         @auth
-                            <a href="{{ route('admin.dashboard') }}" class="hover:text-primary">Dashboard</a>
+                            <a href="{{ route('admin.dashboard') }}" class="hover:text-primary text-slate-600">Dashboard</a>
                         @else
-                            <a href="{{ route('login') }}" class="hover:text-primary">Admin Login</a>
+                            <a href="{{ route('login') }}" class="hover:text-primary text-slate-600">Admin Login</a>
                         @endauth
                     </div>
                 </div>

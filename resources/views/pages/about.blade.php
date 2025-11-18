@@ -18,7 +18,7 @@
                     <li>✓ Tim kurir dan operator yang responsif.</li>
                 </ul>
                 <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-                    <a href="{{ route('order.create') }}" class="rounded-2xl bg-primary px-5 py-3 text-center text-sm font-semibold text-white">Buat Pesanan</a>
+                    <a href="{{ route('order.create') }}" class="rounded-2xl border border-primary bg-primary px-5 py-3 text-center text-sm font-semibold text-white">Buat Pesanan</a>
                     <a href="{{ route('contact') }}" class="rounded-2xl border border-slate-200 px-5 py-3 text-center text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">Hubungi Admin</a>
                 </div>
             </div>

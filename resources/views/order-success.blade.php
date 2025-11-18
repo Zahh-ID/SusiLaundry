@@ -51,7 +51,7 @@
                 <p class="text-sm font-semibold text-slate-700">Scan QRIS untuk melakukan pembayaran</p>
                 <img src="{{ $latestPayment->qris_image_url }}" alt="QRIS" class="mx-auto mt-4 h-48 w-48 rounded-xl border border-white shadow-inner">
                 <p class="mt-2 text-xs text-slate-500">Kedaluwarsa pada {{ optional($latestPayment->expiry_time)->translatedFormat('d M Y H:i') }}</p>
-                <a href="{{ $latestPayment->qris_url }}" target="_blank" class="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white">
+                <a href="{{ $latestPayment->qris_url }}" target="_blank" class="mt-4 inline-flex items-center justify-center rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white">
                     Buka QRIS
                 </a>
             </div>
@@ -61,7 +61,7 @@
             </div>
         @endif
         <div class="mt-8 flex flex-col gap-3 md:flex-row">
-            <a href="{{ route('tracking') }}" class="flex-1 rounded-2xl bg-primary px-4 py-3 text-center font-semibold text-white hover:bg-indigo-600">
+            <a href="{{ route('tracking') }}" class="flex-1 rounded-2xl border border-primary bg-primary px-4 py-3 text-center font-semibold text-white hover:bg-indigo-600">
                 Cek Status Laundry
             </a>
             <button onclick="window.print()" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 hover:border-primary hover:text-primary">

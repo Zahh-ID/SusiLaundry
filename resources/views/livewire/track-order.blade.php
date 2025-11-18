@@ -33,7 +33,7 @@
                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                 @error('order_code') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
-            <button type="submit" class="w-full rounded-2xl bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
+            <button type="submit" class="w-full rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600">
                 Cek Status
             </button>
         </form>
@@ -112,7 +112,7 @@
                             <p class="text-sm font-semibold text-slate-700">Scan QRIS untuk melakukan pembayaran</p>
                             <img src="{{ $pendingPayment->qris_image_url }}" alt="QRIS" class="mx-auto mt-4 h-40 w-40 rounded-xl border border-slate-200">
                             <p class="mt-2 text-xs text-slate-500">Kedaluwarsa pada {{ optional($pendingPayment->expiry_time)->translatedFormat('d M Y H:i') }}</p>
-                            <a href="{{ $pendingPayment->qris_url }}" target="_blank" class="mt-3 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white">
+                            <a href="{{ $pendingPayment->qris_url }}" target="_blank" class="mt-3 inline-flex items-center justify-center rounded-full border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white">
                                 Buka QRIS
                             </a>
                         </div>
