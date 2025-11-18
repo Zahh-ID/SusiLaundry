@@ -24,6 +24,17 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
       - name: Copy .env
         run: cp .env.example .env
 
@@ -54,17 +65,6 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/testing.sqlite
         run: php artisan test
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install Node dependencies
-        run: npm ci
-
-      - name: Build assets
-        run: npm run build
 
       - name: Deploy (placeholder)
         if: github.ref == 'refs/heads/main'
