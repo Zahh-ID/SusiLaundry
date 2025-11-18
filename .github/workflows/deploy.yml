@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Cache npm
         uses: actions/cache@v4
@@ -40,32 +40,22 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Test SSH connectivity
+      - name: Test SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_KEY }}
-          script: 'echo "Connected to $(hostname)"'
+          script: 'echo "OK $(hostname)"; uname -a'
 
-      - name: Ensure deploy directory exists
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      - name: Ensure target dir exists
         run: |
-          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" \
-            "$SSH_USER@$SSH_HOST" \
-            "mkdir -p '$DEPLOY_PATH'"
+          ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "mkdir -p '${{ secrets.DEPLOY_PATH }}'"
 
       - name: Rsync source to server
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           rsync -az --delete \
             --exclude='.git/' \
@@ -73,27 +63,15 @@ jobs:
             --exclude='node_modules/' \
             --exclude='vendor/' \
             --exclude='.env' \
-            -e "ssh -o StrictHostKeyChecking=no -p $SSH_PORT" \
-            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+            -e "ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}"
 
       - name: Post-deploy tasks
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          DB_HOST: ${{ secrets.DB_HOST || '127.0.0.1' }}
-          DB_PORT: ${{ secrets.DB_PORT || '3306' }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE || 'susilaundry' }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME || 'susilaundry' }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'secret' }}
-          PHP_FPM_SERVICE: ${{ secrets.PHP_FPM_SERVICE || 'php8.3-fpm' }}
-          NGINX_SERVICE: ${{ secrets.NGINX_SERVICE || 'nginx' }}
         run: |
-          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" \
-            "$SSH_USER@$SSH_HOST" bash -lc "
+          ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -lc "
               set -e
-              cd '$DEPLOY_PATH'
+              cd '${{ secrets.DEPLOY_PATH }}'
 
               if ! command -v composer >/dev/null 2>&1; then
                 curl -sS https://getcomposer.org/installer | php
@@ -105,11 +83,11 @@ jobs:
                 php artisan key:generate || true
                 sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env || true
                 sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env || true
-                sed -i \"s/^DB_HOST=.*/DB_HOST=$DB_HOST/\" .env || true
-                sed -i \"s/^DB_PORT=.*/DB_PORT=$DB_PORT/\" .env || true
-                sed -i \"s/^DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/\" .env || true
-                sed -i \"s/^DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/\" .env || true
-                sed -i \"s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/\" .env || true
+                sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env || true
+                sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env || true
+                sed -i 's/^DB_DATABASE=.*/DB_DATABASE=susilaundry/' .env || true
+                sed -i 's/^DB_USERNAME=.*/DB_USERNAME=susilaundry/' .env || true
+                sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=secret/' .env || true
               fi
 
               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
@@ -125,8 +103,8 @@ jobs:
               chgrp -R www-data storage bootstrap/cache || true
               chmod -R ug+rwx storage bootstrap/cache || true
 
-              sudo systemctl reload '$PHP_FPM_SERVICE' || true
-              sudo systemctl reload '$NGINX_SERVICE' || true
+              sudo systemctl reload '${{ secrets.PHP_FPM_SERVICE || 'php8.3-fpm' }}' || true
+              sudo systemctl reload '${{ secrets.NGINX_SERVICE || 'nginx' }}' || true
 
               echo 'Deploy SusiLaundry selesai ✅'
             "
