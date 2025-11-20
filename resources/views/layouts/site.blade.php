@@ -48,7 +48,7 @@
                     <p>© {{ now()->year }} Omah Susi Laundry. All rights reserved.</p>
                     <div class="flex gap-4">
                         <a href="mailto:halo@susilaundry.id" class="hover:text-primary text-slate-600">halo@susilaundry.id</a>
-                        <a href="tel:+6281234567890" class="hover:text-primary text-slate-600">+62 812-3456-7890</a>
+                        <a href="tel:+6285645520620" class="hover:text-primary text-slate-600">+62 856-455-206-20</a>
                         @auth
                             <a href="{{ route('admin.dashboard') }}" class="hover:text-primary text-slate-600">Dashboard</a>
                         @else

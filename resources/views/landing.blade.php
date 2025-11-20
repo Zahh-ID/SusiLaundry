@@ -178,9 +178,9 @@
             <h3 class="text-2xl font-bold text-slate-900">Hubungi tim CS kami</h3>
             <p class="mt-2 text-sm text-slate-600">Tanyakan promo, jadwal pick-up, atau request khusus via WhatsApp maupun telepon.</p>
             <div class="mt-8 space-y-3 text-sm font-semibold">
-                <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-slate-700 hover:border-primary">
+                <a href="https://wa.me/6285645520620" target="_blank" rel="noopener" class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-slate-700 hover:border-primary">
                     <span>WhatsApp Admin</span>
-                    <span>+62 812-3456-7890</span>
+                    <span>+62 856-455-206-20</span>
                 </a>
                 <a href="tel:+62211234567" class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-slate-700 hover:border-primary">
                     <span>Telepon Kantor</span>
@@ -250,7 +250,7 @@
             <div class="mt-6 space-y-4 text-sm text-slate-600">
                 <div class="rounded-2xl border border-slate-200 p-4">
                     <p class="text-xs uppercase text-slate-500">Chat WhatsApp</p>
-                    <p class="text-lg font-semibold text-slate-900">+62 812-3456-7890</p>
+                    <p class="text-lg font-semibold text-slate-900">+62 856-455-206-20</p>
                 </div>
                 <div class="rounded-2xl border border-slate-200 p-4">
                     <p class="text-xs uppercase text-slate-500">Telepon</p>

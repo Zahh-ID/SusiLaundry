@@ -8,9 +8,9 @@
             <p class="mt-3 text-slate-600">Pilih cara tercepat untuk terhubung langsung dengan admin.</p>
         </div>
         <div class="mt-10 grid gap-6 md:grid-cols-3">
-            <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" class="rounded-3xl border border-slate-100 bg-white p-6 text-center shadow-soft hover:border-primary">
+            <a href="https://wa.me/6285645520620" target="_blank" rel="noopener" class="rounded-3xl border border-slate-100 bg-white p-6 text-center shadow-soft hover:border-primary">
                 <p class="text-sm font-semibold text-primary">Chat WhatsApp</p>
-                <p class="mt-3 text-2xl font-bold text-slate-900">+62 812-3456-7890</p>
+                <p class="mt-3 text-2xl font-bold text-slate-900">+62 856-455-206-20</p>
                 <p class="mt-2 text-sm text-slate-600">Respons maksimal 5 menit.</p>
             </a>
             <a href="tel:+62211234567" class="rounded-3xl border border-slate-100 bg-white p-6 text-center shadow-soft hover:border-primary">

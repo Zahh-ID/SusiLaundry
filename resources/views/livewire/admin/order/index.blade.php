@@ -68,7 +68,7 @@
             <div>
                 <label class="text-sm font-semibold text-slate-600" for="date-to">Sampai</label>
                 <input id="date-to" type="date" wire:model.live="dateTo"
-                       class="mt-2 w/full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                       class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
             </div>
         </div>
 
@@ -153,7 +153,7 @@
 @endif
 
 @if($showExportModal)
-    <div class="fixed inset-0 z-50 flex items=center justify-center bg-black/60 px-4">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
         <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
             <div class="flex items-start justify-between">
                 <div>
@@ -199,7 +199,7 @@
                 <div class="mt-4">
                     <label class="text-sm font-semibold text-slate-600" for="actual_weight">Berat Aktual (kg)</label>
                     <input id="actual_weight" type="number" step="0.1" wire:model.defer="actual_weight"
-                           class="mt-2 w/full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                           class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     @error('actual_weight')
                         <span class="text-xs text-red-500">{{ $message }}</span>
                     @enderror
@@ -224,7 +224,7 @@
 
 @if($showCancelModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-        <div class="w-full max-w-md rounded-3xl bg.white p-6 shadow-2xl">
+        <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold uppercase text-primary">Konfirmasi</p>

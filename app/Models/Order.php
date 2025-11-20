@@ -90,4 +90,17 @@ class Order extends Model
     {
         return config('orders.order_status_flow', []);
     }
+
+    public static function initialStatus(): string
+    {
+        $flow = static::statusFlow();
+
+        if (! empty($flow)) {
+            return $flow[0];
+        }
+
+        $statuses = config('orders.order_statuses', []);
+
+        return array_key_first($statuses) ?? 'pending_confirmation';
+    }
 }

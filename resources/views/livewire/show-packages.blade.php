@@ -47,7 +47,7 @@
         <a href="{{ route('landing') }}" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
             Kembali
         </a>
-        <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" class="rounded-2xl border border-primary px-5 py-3 text-sm font-semibold text-primary hover:bg-primary/10">
+        <a href="https://wa.me/6285645520620" target="_blank" rel="noopener" class="rounded-2xl border border-primary px-5 py-3 text-sm font-semibold text-primary hover:bg-primary/10">
             Chat WhatsApp Admin
         </a>
     </div>
