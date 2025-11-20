@@ -72,4 +72,27 @@
             </a>
         </div>
     </div>
+
+    <div x-data="{ open: true }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6 py-10" x-transition.opacity>
+        <div class="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-8 text-center shadow-2xl" x-transition.scale>
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v4m0 4h.01M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                </svg>
+            </div>
+            <h2 class="mt-4 text-2xl font-bold text-slate-900">Pesanan menunggu konfirmasi</h2>
+            <p class="mt-3 text-sm text-slate-600">
+                Tim admin kami akan mengecek detail order, menimbang cucian, dan menghubungi kamu sebelum proses dimulai.
+                Mohon pantau email untuk info selanjutnya.
+            </p>
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button type="button" @click="open = false" class="flex-1 rounded-2xl border border-primary bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-600">
+                    Mengerti
+                </button>
+                <a href="{{ route('tracking', ['code' => $order->order_code]) }}" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
+                    Lihat status sekarang
+                </a>
+            </div>
+        </div>
+    </div>
 @endsection

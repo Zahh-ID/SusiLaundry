@@ -27,8 +27,8 @@
                     <p class="text-lg font-semibold text-slate-900">{{ $order->customer?->name }}</p>
                 </div>
                 <div>
-                    <p class="text-xs uppercase text-slate-400">Kontak</p>
-                    <p class="text-lg font-semibold text-slate-900">{{ $order->customer?->phone }}</p>
+                    <p class="text-xs uppercase text-slate-400">Email</p>
+                    <p class="text-lg font-semibold text-slate-900">{{ $order->customer?->email ?? $order->customer?->phone ?? 'Belum ada' }}</p>
                 </div>
                 <div>
                     <p class="text-xs uppercase text-slate-400">Alamat</p>

@@ -3,9 +3,11 @@
 namespace App\Livewire\Admin\Order;
 
 use App\Models\Order;
-use App\Services\WhatsappNotifier;
+use App\Services\OrderEmailNotifier;
+use App\Services\QrisGenerator;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use RuntimeException;
 
 class Index extends Component
 {
@@ -184,9 +186,30 @@ class Index extends Component
             ]);
         });
 
-        app(WhatsappNotifier::class)->notifyStatusUpdated($order->fresh('customer', 'package'));
+        $order->refresh();
 
-        session()->flash('message', 'Pesanan bergerak ke status '.($this->availableStatuses[$nextStatus] ?? ucfirst($nextStatus)).'.');
+        $qrisGenerated = false;
+
+        try {
+            $qrisGenerated = $this->maybeGenerateQrisPayment($order, $nextStatus);
+        } catch (\Throwable $th) {
+            report($th);
+            session()->flash('error', 'QRIS pembayaran gagal dibuat. Coba beberapa saat lagi.');
+        }
+
+        $order->refresh();
+
+        $additionalMessage = $qrisGenerated
+            ? 'QRIS pembayaran siap dibagikan ke pelanggan dan dapat dilihat di halaman tracking.'
+            : null;
+        app(OrderEmailNotifier::class)->sendStatusUpdated($order->fresh('customer', 'package'), $additionalMessage);
+
+        $message = 'Pesanan bergerak ke status '.($this->availableStatuses[$nextStatus] ?? ucfirst($nextStatus)).'.';
+        if ($additionalMessage) {
+            $message .= ' '.$additionalMessage;
+        }
+
+        session()->flash('message', $message);
         $this->closeAdvanceModal();
     }
 
@@ -227,9 +250,58 @@ class Index extends Component
         $order->save();
 
         $order->appendActivity('admin', 'order_cancelled', []);
-        app(WhatsappNotifier::class)->notifyStatusUpdated($order->fresh('customer', 'package'));
+        app(OrderEmailNotifier::class)->sendStatusUpdated($order->fresh('customer', 'package'));
 
         session()->flash('message', 'Pesanan dibatalkan.');
         $this->closeCancelModal();
+    }
+
+    protected function maybeGenerateQrisPayment(Order $order, string $nextStatus): bool
+    {
+        if ($order->payment_method !== 'qris' || $order->payment_status === 'paid') {
+            return false;
+        }
+
+        if ($nextStatus !== 'processing') {
+            return false;
+        }
+
+        if ($order->payments()->where('status', 'pending')->exists()) {
+            return false;
+        }
+
+        $order->loadMissing('package');
+
+        $weight = $order->actual_weight ?? $order->estimated_weight;
+        $pricePerKg = $order->price_per_kg ?? $order->package?->price_per_kg;
+
+        if (! $weight || ! $pricePerKg) {
+            throw new RuntimeException('Berat aktual atau harga paket belum ditetapkan.');
+        }
+
+        $deliveryFee = $order->delivery_fee ?? 0;
+        $amount = (float) (($weight * $pricePerKg) + $deliveryFee);
+
+        $payload = app(QrisGenerator::class)->generate($amount, $order->order_code);
+
+        $order->payments()->create([
+            'method' => 'qris',
+            'amount' => $amount,
+            'status' => 'pending',
+            'qris_url' => $payload['qris_url'] ?? null,
+            'qris_image_url' => $payload['qris_image_url'] ?? null,
+            'qris_payload' => $payload['payload'] ?? null,
+            'midtrans_transaction_id' => $payload['transaction_id'] ?? null,
+            'expiry_time' => $payload['expiry'] ?? null,
+        ]);
+
+        $order->payment_status = 'pending';
+        $order->save();
+
+        $order->appendActivity('system', 'qris_generated', [
+            'amount' => $amount,
+        ]);
+
+        return true;
     }
 }

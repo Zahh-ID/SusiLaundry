@@ -19,7 +19,7 @@
 
     <h3>Data Pelanggan</h3>
     <p>Nama: {{ $order->customer?->name }}</p>
-    <p>Kontak: {{ $order->customer?->phone }}</p>
+    <p>Email: {{ $order->customer?->email ?? $order->customer?->phone ?? '-' }}</p>
     <p>Alamat: {{ $order->customer?->address }}</p>
 
     <h3>Detail Pesanan</h3>

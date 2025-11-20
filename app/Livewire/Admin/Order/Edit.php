@@ -3,8 +3,9 @@
 namespace App\Livewire\Admin\Order;
 
 use App\Models\Order;
+use App\Services\OrderEmailNotifier;
+use App\Services\PaymentReceiptMailer;
 use App\Services\QrisGenerator;
-use App\Services\WhatsappNotifier;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -98,9 +99,12 @@ class Edit extends Component
             'payment_status' => $this->payment_status,
         ]);
 
-        $notifier = app(WhatsappNotifier::class);
-        if ($originalStatus !== $this->status || $originalPaymentStatus !== $this->payment_status) {
-            $notifier->notifyStatusUpdated($this->order->fresh('customer', 'package'));
+        $emailNotifier = app(OrderEmailNotifier::class);
+        $receiptMailer = app(PaymentReceiptMailer::class);
+        $updatedOrder = $this->order->fresh('customer', 'package');
+        $emailNotifier->sendStatusUpdated($updatedOrder);
+        if ($this->payment_status === 'paid' && $originalPaymentStatus !== 'paid') {
+            $receiptMailer->send($updatedOrder);
         }
 
         session()->flash('message', 'Pesanan berhasil diperbarui.');
@@ -117,6 +121,9 @@ class Edit extends Component
         $this->order->appendActivity('admin', 'payment_marked_paid', []);
         $this->payment_status = 'paid';
         $this->latestPayment = $payment?->refresh();
+        $freshOrder = $this->order->fresh('customer', 'package');
+        app(PaymentReceiptMailer::class)->send($freshOrder, $this->latestPayment);
+        app(OrderEmailNotifier::class)->sendStatusUpdated($freshOrder, 'Pembayaran kamu sudah kami tandai lunas.');
         session()->flash('message', 'Pembayaran ditandai lunas.');
     }
 
@@ -164,6 +171,10 @@ class Edit extends Component
 
         $this->latestPayment = $payment;
         $this->payment_status = 'pending';
+        app(OrderEmailNotifier::class)->sendStatusUpdated(
+            $this->order->fresh('customer', 'package'),
+            'QRIS baru siap digunakan untuk pembayaran.'
+        );
         session()->flash('message', 'QRIS baru berhasil dibuat.');
     }
 

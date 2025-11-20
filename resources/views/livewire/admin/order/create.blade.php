@@ -26,9 +26,9 @@
                     @error('name') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="text-sm font-semibold text-slate-600">Nomor HP</label>
-                    <input type="text" wire:model.defer="phone" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    @error('phone') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                    <label class="text-sm font-semibold text-slate-600">Email Pelanggan</label>
+                    <input type="email" wire:model.defer="email" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    @error('email') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
             </div>
             <div>
@@ -70,14 +70,12 @@
             </div>
             <div>
                 <label class="text-sm font-semibold text-slate-600">Metode Pembayaran</label>
-                <div class="mt-3 flex flex-col gap-2 sm:flex-row">
+                <select wire:model.defer="payment_method"
+                        class="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     @foreach($paymentMethods as $key => $label)
-                        <label class="flex flex-1 items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary">
-                            <input type="radio" class="text-primary focus:ring-primary" wire:model.defer="payment_method" value="{{ $key }}">
-                            <span>{{ $label }}</span>
-                        </label>
+                        <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
-                </div>
+                </select>
                 <p class="mt-2 text-xs text-slate-500">Pembayaran QRIS akan membuka popup Midtrans dan pesanan tersimpan setelah lunas.</p>
                 @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>

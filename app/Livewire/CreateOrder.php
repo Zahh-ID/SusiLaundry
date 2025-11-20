@@ -5,31 +5,34 @@ namespace App\Livewire;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Package;
-use App\Services\WhatsappNotifier;
+use App\Services\OrderEmailNotifier;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
 class CreateOrder extends Component
 {
     public $name;
-    public $phone;
+    public $email;
     public $address;
     public $package_id;
     public $estimated_weight;
     public $service_type = 'regular';
     public $notes;
     public $pickup_or_delivery = 'none';
+    public $payment_method = 'cash';
 
     protected function rules(): array
     {
         return [
             'name' => 'required|string',
-            'phone' => 'required|string',
+            'email' => 'required|email',
             'address' => 'required|string',
             'package_id' => 'required|exists:packages,id',
             'estimated_weight' => 'required|numeric|min:1',
             'service_type' => 'required|string',
             'pickup_or_delivery' => 'required|in:none,pickup,delivery',
+            'payment_method' => 'required|in:cash,qris',
             'notes' => 'nullable|string',
         ];
     }
@@ -38,11 +41,14 @@ class CreateOrder extends Component
     {
         $data = $this->validate();
 
-        $customer = Customer::create([
+        $customerPayload = [
             'name' => $data['name'],
-            'phone' => $data['phone'],
+            'phone' => '',
             'address' => $data['address'],
-        ]);
+            'email' => $data['email'],
+        ];
+
+        $customer = Customer::create($customerPayload);
 
         $package = Package::findOrFail($data['package_id']);
         $inactiveStatuses = config('orders.inactive_statuses', ['completed', 'cancelled']);
@@ -58,7 +64,7 @@ class CreateOrder extends Component
             'notes' => $data['notes'] ?? null,
             'status' => Order::initialStatus(),
             'price_per_kg' => $package->price_per_kg,
-            'payment_method' => 'cash',
+            'payment_method' => $data['payment_method'],
             'payment_status' => 'pending',
             'queue_position' => $queuePosition,
             'estimated_completion' => $estimatedCompletion,
@@ -69,9 +75,10 @@ class CreateOrder extends Component
 
         $order->appendActivity('guest', 'order_created', [
             'pickup_or_delivery' => $data['pickup_or_delivery'],
+            'contact_email' => $data['email'],
         ]);
 
-        app(WhatsappNotifier::class)->notifyOrderCreated($order);
+        app(OrderEmailNotifier::class)->sendOrderCreated($order->fresh('customer', 'package'), $data['email']);
 
         $this->resetForm();
 
@@ -87,17 +94,20 @@ class CreateOrder extends Component
     {
         $this->reset([
             'name',
-            'phone',
+            'email',
             'address',
             'package_id',
             'estimated_weight',
             'service_type',
             'notes',
             'pickup_or_delivery',
+            'payment_method',
         ]);
 
         $this->service_type = 'regular';
         $this->pickup_or_delivery = 'none';
+        $this->payment_method = 'cash';
+        $this->email = null;
     }
 
     public function render()
@@ -105,6 +115,7 @@ class CreateOrder extends Component
         return view('livewire.create-order', [
             'packages' => Package::all(),
             'pickupOptions' => config('orders.pickup_options'),
+            'paymentMethods' => config('orders.payment_methods'),
         ])->layout('layouts.site', ['title' => 'Form Pemesanan Laundry']);
     }
 }

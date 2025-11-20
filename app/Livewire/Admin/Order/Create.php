@@ -6,16 +6,18 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Package;
 use App\Services\MidtransClient;
+use App\Services\OrderEmailNotifier;
+use App\Services\PaymentReceiptMailer;
 use App\Services\QrisGenerator;
-use App\Services\WhatsappNotifier;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
 class Create extends Component
 {
     public $name;
-    public $phone;
+    public $email;
     public $address;
     public $package_id;
     public $estimated_weight;
@@ -36,7 +38,7 @@ class Create extends Component
     {
         return [
             'name' => 'required|string',
-            'phone' => 'required|string',
+            'email' => 'required|email',
             'address' => 'required|string',
             'package_id' => 'required|exists:packages,id',
             'estimated_weight' => 'required|numeric|min:1',
@@ -183,11 +185,17 @@ class Create extends Component
         $queuePosition = Order::whereNotIn('status', $inactiveStatuses)->count() + 1;
         $estimatedCompletion = now()->addHours($package->turnaround_hours ?? 48);
 
-        $customer = Customer::create([
+        $customerPayload = [
             'name' => $data['name'],
-            'phone' => $data['phone'],
+            'phone' => '',
             'address' => $data['address'],
-        ]);
+        ];
+
+        if (Schema::hasColumn('customers', 'email')) {
+            $customerPayload['email'] = $data['email'];
+        }
+
+        $customer = Customer::create($customerPayload);
 
         $order = Order::create([
             'order_code' => $data['order_code'] ?? Str::upper(Str::random(10)),
@@ -219,9 +227,10 @@ class Create extends Component
         $order->appendActivity('admin', 'order_created', [
             'payment_method' => $data['payment_method'],
             'payment_status' => $order->payment_status,
+            'contact_email' => $data['email'] ?? null,
         ]);
 
-        app(WhatsappNotifier::class)->notifyOrderCreated($order);
+        app(OrderEmailNotifier::class)->sendOrderCreated($order->fresh('customer', 'package'), $data['email'] ?? null);
 
         return $order;
     }
@@ -237,6 +246,10 @@ class Create extends Component
 
     protected function afterOrderCreated(Order $order): void
     {
+        if ($order->payment_status === 'paid') {
+            app(PaymentReceiptMailer::class)->send($order->fresh('customer', 'package'));
+        }
+
         $this->successCode = $order->order_code;
         session()->flash('message', 'Pesanan berhasil dibuat.');
         $this->resetFormFields();
@@ -246,7 +259,7 @@ class Create extends Component
     {
         $this->reset([
             'name',
-            'phone',
+            'email',
             'address',
             'package_id',
             'estimated_weight',
@@ -260,6 +273,7 @@ class Create extends Component
         $this->payment_method = 'cash';
         $this->pickup_or_delivery = 'none';
         $this->delivery_fee = null;
+        $this->email = null;
     }
 
     public function render()

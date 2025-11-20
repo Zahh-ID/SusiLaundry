@@ -23,8 +23,11 @@ class Index extends Component
     {
         $customers = Customer::withCount('orders')
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('phone', 'like', '%'.$this->search.'%');
+                $query->where(function ($subQuery) {
+                    $subQuery->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        ->orWhere('phone', 'like', '%'.$this->search.'%');
+                });
             })
             ->orderByDesc('orders_count')
             ->paginate(10);

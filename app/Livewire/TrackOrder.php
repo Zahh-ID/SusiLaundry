@@ -28,13 +28,27 @@ class TrackOrder extends Component
         ]);
 
         $this->errorMessage = null;
-        $this->order = Order::where('order_code', $this->order_code)
-            ->with(['customer', 'package', 'payments' => fn ($query) => $query->latest()])
-            ->first();
+        $this->order = $this->queryOrder($this->order_code);
 
         if (! $this->order) {
             $this->errorMessage = 'Kode tidak ditemukan, silakan cek kembali.';
         }
+    }
+
+    public function refreshStatus(): void
+    {
+        if (! $this->order_code || ! $this->order) {
+            return;
+        }
+
+        $this->order = $this->queryOrder($this->order_code);
+    }
+
+    protected function queryOrder(string $code): ?Order
+    {
+        return Order::where('order_code', $code)
+            ->with(['customer', 'package', 'payments' => fn ($query) => $query->latest()])
+            ->first();
     }
 
     public function render()

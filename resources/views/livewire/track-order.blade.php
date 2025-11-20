@@ -8,7 +8,7 @@
     <div>
         <p class="text-sm font-semibold text-primary">Tracking Pesanan</p>
         <h1 class="mb-3 text-4xl font-bold text-slate-900">Pantau status kapan saja</h1>
-        <p class="text-slate-600">Masukkan kode tracking (10 karakter) yang kami kirim lewat WhatsApp. Status pesanan akan tampil otomatis.</p>
+        <p class="text-slate-600">Masukkan kode tracking (10 karakter) yang kami kirim lewat email. Status pesanan akan tampil otomatis.</p>
         <div class="mt-10 space-y-4 rounded-3xl border border-slate-100 bg-slate-50 p-6">
             <p class="text-sm font-semibold text-slate-700">Status Pesanan</p>
             <ul class="space-y-3 text-sm text-slate-500">
@@ -50,7 +50,7 @@
                 $progressSteps = $timelineSteps;
                 $activeIndex = array_search($order->status, $statusKeys, true);
             @endphp
-            <div class="mt-6 space-y-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-5 text-sm text-slate-600">
+            <div class="mt-6 space-y-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-5 text-sm text-slate-600" wire:poll.visible.15s="refreshStatus">
                 @if($order->payment_method === 'qris' && $order->payment_status !== 'paid')
                     <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
                         Silakan selesaikan pembayaran terlebih dahulu untuk melanjutkan proses pengambilan.

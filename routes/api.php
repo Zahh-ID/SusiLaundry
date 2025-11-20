@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\Webhook\MidtransWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,3 +32,5 @@ Route::prefix('admin')->group(function () {
     Route::resource('orders', AdminController::class);
     Route::resource('packages', PackageController::class);
 });
+
+Route::post('/webhooks/midtrans', MidtransWebhookController::class);

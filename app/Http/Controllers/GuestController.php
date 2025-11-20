@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Package;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class GuestController extends Controller
@@ -34,9 +35,9 @@ class GuestController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","phone","address","package_id","estimated_weight","service_type"},
+     *             required={"name","email","address","package_id","estimated_weight","service_type"},
      *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="phone", type="string"),
+     *             @OA\Property(property="email", type="string"),
      *             @OA\Property(property="address", type="string"),
      *             @OA\Property(property="package_id", type="integer"),
      *             @OA\Property(property="estimated_weight", type="number"),
@@ -54,7 +55,7 @@ class GuestController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'phone' => 'required|string',
+            'email' => 'required|email',
             'address' => 'required|string',
             'package_id' => 'required|exists:packages,id',
             'estimated_weight' => 'required|numeric',
@@ -62,7 +63,17 @@ class GuestController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $customer = Customer::create($request->only(['name', 'phone', 'address']));
+        $customerPayload = [
+            'name' => $request->name,
+            'phone' => '',
+            'address' => $request->address,
+        ];
+
+        if (Schema::hasColumn('customers', 'email')) {
+            $customerPayload['email'] = $request->email;
+        }
+
+        $customer = Customer::create($customerPayload);
 
         $order = Order::create([
             'order_code' => Str::random(10),

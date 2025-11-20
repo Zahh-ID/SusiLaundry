@@ -3,14 +3,14 @@
         <p class="text-sm font-semibold text-primary">Form Pemesanan</p>
         <h1 class="mb-3 text-4xl font-bold text-slate-900">Laundry kamu kami urus</h1>
         <p class="text-slate-600">
-            Isi data dengan benar dan tim kami akan menghubungi maksimal 5 menit setelah form dikirim.
+            Isi data dengan benar dan tim kami akan menghubungi maksimal 5 menit setelah form dikirim melalui email.
         </p>
         <div class="mt-10 rounded-3xl border border-slate-100 bg-blue-50/60 p-6 text-sm text-slate-600">
             <p class="font-semibold text-slate-900">Panduan cepat:</p>
             <ul class="mt-4 list-disc space-y-1 pl-5">
                 <li>Minimal order 3 kg untuk layanan antar jemput.</li>
                 <li>Berat aktual dan total biaya akan dikonfirmasi setelah cucian ditimbang.</li>
-                <li>Kode tracking otomatis dikirim via WhatsApp.</li>
+                <li>Kode tracking otomatis dikirim via email.</li>
             </ul>
         </div>
     </div>
@@ -28,10 +28,10 @@
                 @error('name') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
             <div>
-                <label for="phone" class="text-sm font-semibold text-slate-600">Nomor WhatsApp</label>
-                <input type="text" id="phone" wire:model.defer="phone" placeholder="0812xxxx"
+                <label for="email" class="text-sm font-semibold text-slate-600">Email Aktif</label>
+                <input type="email" id="email" wire:model.defer="email" placeholder="nama@email.com"
                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                @error('phone') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                @error('email') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
             <div>
                 <label for="address" class="text-sm font-semibold text-slate-600">Alamat Penjemputan</label>
@@ -91,6 +91,19 @@
                 <div class="rounded-2xl border border-dashed border-slate-200 p-4 text-xs text-slate-500">
                     Pickup & delivery tersedia gratis untuk area dalam kota dengan minimal 3kg. Pilih "Antar ke Pelanggan" jika ingin pesanan dikirim kembali.
                 </div>
+            </div>
+            <div>
+                <label for="payment_method" class="text-sm font-semibold text-slate-600">Metode Pembayaran</label>
+                <select id="payment_method" wire:model.defer="payment_method"
+                        class="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    @foreach($paymentMethods as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+                <p class="mt-2 text-xs text-slate-500">
+                    Pilih QRIS bila ingin membayar non-tunai saat pesanan dikonfirmasi. Pembayaran tunai akan dilakukan ketika kurir pickup/delivery.
+                </p>
+                @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
             <div>
                 <label for="notes" class="text-sm font-semibold text-slate-600">Catatan Tambahan</label>
