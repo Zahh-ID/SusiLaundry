@@ -18,7 +18,9 @@
         <div class="min-h-screen flex flex-col">
             <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
                 <div class="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-                    <a href="{{ route('landing') }}" class="text-xl font-bold text-primary">Susi Laundry</a>
+                    <a href="{{ route('landing') }}" class="flex items-center gap-2 text-2xl font-bold text-primary">
+                        <img src="{{ asset('logo.ico') }}" alt="Logo Susi Laundry" class="h-8 w-8 rounded-xl object-contain">                        <span>Susi Laundry</span>
+                </a>
                     <nav class="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
                         <a href="{{ route('landing') }}#layanan" class="hover:text-primary">Layanan</a>
                         <a href="{{ route('landing') }}#paket" class="hover:text-primary">Harga</a>
