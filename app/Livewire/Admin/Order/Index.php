@@ -32,6 +32,10 @@ class Index extends Component
     public ?int $cancelOrderId = null;
     public array $cancelSummary = [];
 
+    protected $listeners = [
+        'order-created' => 'handleOrderCreated',
+    ];
+
     public function mount(): void
     {
         $this->availableStatuses = config('orders.order_statuses', []);
@@ -70,11 +74,10 @@ class Index extends Component
     {
         $this->showCreateModal = false;
     }
-
-    public function confirmCreate()
+    public function handleOrderCreated(): void
     {
         $this->closeCreateModal();
-        return redirect()->route('admin.orders.create');
+        $this->dispatch('$refresh');
     }
 
     public function openExportModal(): void

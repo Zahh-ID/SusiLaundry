@@ -129,27 +129,21 @@
     </div>
 </div>
 
-@if($showCreateModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-        <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase text-primary">Konfirmasi</p>
-                    <h2 class="text-2xl font-bold text-slate-900">Buka Form Manual?</h2>
-                </div>
-                <button type="button" class="text-sm font-semibold text-slate-500 hover:text-primary" wire:click="closeCreateModal">Tutup</button>
-            </div>
-            <p class="mt-3 text-sm text-slate-600">Anda akan diarahkan ke halaman input pesanan manual.</p>
-            <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-                <button type="button" class="flex-1 rounded-2xl border border-primary bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-600" wire:click="confirmCreate">
-                    Ya, buka form
-                </button>
-                <button type="button" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary" wire:click="closeCreateModal">
-                    Batal
-                </button>
+        @if($showCreateModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-3 py-5">
+        <div class="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <button type="button" class="absolute right-6 top-6 z-10 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow hover:border-primary hover:text-primary" wire:click="closeCreateModal">
+                ✕ <span>Tutup</span>
+            </button>
+            <div class="h-full overflow-y-auto p-5 lg:p-6">
+                <livewire:admin.order.create :embedded="true" wire:key="create-order-modal" />
             </div>
         </div>
     </div>
+@endif
+
+@if($showCreateModal)
+    <style>body { overflow: hidden; }</style>
 @endif
 
 @if($showExportModal)

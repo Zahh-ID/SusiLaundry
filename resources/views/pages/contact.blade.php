@@ -37,7 +37,7 @@
             <div class="overflow-hidden rounded-3xl border border-slate-100 shadow-soft">
                 <iframe
                     title="Lokasi Laundry"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3955.8667278256494!2d110.40302727604154!3d-7.482363173622939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a144115d67fb9%3A0x50d0e53fcd1ebdb0!2sLaundry!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid"
+                    src="https://www.google.com/maps?q=maps.app.goo.gl/nPgsQ1A79ij54K8V6&output=embed"
                     width="100%"
                     height="320"
                     style="border:0;"

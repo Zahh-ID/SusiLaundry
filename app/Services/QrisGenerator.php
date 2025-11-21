@@ -14,6 +14,11 @@ class QrisGenerator
         $serverKey = config('midtrans.server_key');
 
         if (! $serverKey) {
+            // In local/dev environments, allow a fallback QR so the UI keeps working.
+            if (app()->environment('local', 'development', 'testing')) {
+                return $this->fakeQrisPayload($amount, $orderCode);
+            }
+
             throw new RuntimeException('MIDTRANS_SERVER_KEY belum dikonfigurasi.');
         }
 
@@ -50,6 +55,29 @@ class QrisGenerator
             'qris_url' => $qrAction['url'] ?? ($response['deeplink_url'] ?? null),
             'qris_image_url' => $imageUrl,
             'expiry' => $expiry,
+        ];
+    }
+
+    /**
+     * Fallback QR generator for local/testing when Midtrans keys are absent.
+     */
+    protected function fakeQrisPayload(float $amount, string $orderCode): array
+    {
+        $qrContent = sprintf(
+            'QRIS-DEV|order:%s|amount:%s|timestamp:%s',
+            $orderCode,
+            (int) round($amount),
+            now()->timestamp
+        );
+
+        $imageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='.urlencode($qrContent);
+
+        return [
+            'transaction_id' => 'DEV-'.$orderCode,
+            'payload' => $qrContent,
+            'qris_url' => $imageUrl,
+            'qris_image_url' => $imageUrl,
+            'expiry' => now()->addMinutes(config('orders.qris_expiry_minutes', 30)),
         ];
     }
 }

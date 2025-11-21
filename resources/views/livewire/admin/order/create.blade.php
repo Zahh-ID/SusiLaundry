@@ -1,13 +1,20 @@
-<div class="mx-auto w-full max-w-4xl space-y-6">
-    <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center text-sm font-semibold text-slate-600 hover:text-primary">
-        ← Kembali ke daftar pesanan
-    </a>
-    <div>
-        <p class="text-sm font-semibold text-primary">Tambah Pesanan Manual</p>
-        <h1 class="text-3xl font-bold text-slate-900">Input Pesanan Offline</h1>
+@php
+    $wrapperClass = $embedded ? 'mx-auto w-full max-w-2xl space-y-3' : 'mx-auto w-full max-w-3xl space-y-4';
+    $cardPadding = $embedded ? 'p-4 lg:p-5' : 'p-5';
+@endphp
+
+<div class="{{ $wrapperClass }}">
+    @if(!$embedded)
+        <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center text-sm font-semibold text-slate-600 hover:text-primary">
+            ← Kembali ke daftar pesanan
+        </a>
+    @endif
+    <div class="@if($embedded) text-center @endif space-y-1">
+        <p class="text-[11px] font-semibold text-primary uppercase tracking-wide">Tambah Pesanan Manual</p>
+        <h1 class="text-2xl font-bold text-slate-900">Input Pesanan Offline</h1>
         <p class="text-sm text-slate-500">Gunakan form ini untuk pesanan via telepon atau walk-in.</p>
     </div>
-    <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-slate-100 bg-white {{ $cardPadding }} shadow-lg">
         @if(session()->has('message') && $successCode)
             <div class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
                 {{ session('message') }} Kode tracking: {{ $successCode }}
@@ -18,28 +25,28 @@
                 {{ session('error') }}
             </div>
         @endif
-        <form class="space-y-5" wire:submit.prevent="save">
-            <div class="grid gap-4 md:grid-cols-2">
+        <form class="space-y-4" wire:submit.prevent="save">
+            <div class="grid gap-3 md:grid-cols-2">
                 <div>
                     <label class="text-sm font-semibold text-slate-600">Nama Pelanggan</label>
-                    <input type="text" wire:model.defer="name" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <input type="text" wire:model.defer="name" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     @error('name') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-slate-600">Email Pelanggan</label>
-                    <input type="email" wire:model.defer="email" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <input type="email" wire:model.defer="email" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     @error('email') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
             </div>
             <div>
                 <label class="text-sm font-semibold text-slate-600">Alamat</label>
-                <textarea wire:model.defer="address" rows="3" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+                <textarea wire:model.defer="address" rows="3" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
                 @error('address') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-3 md:grid-cols-2">
                 <div>
                     <label class="text-sm font-semibold text-slate-600">Paket</label>
-                    <select wire:model.defer="package_id" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <select wire:model.defer="package_id" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                         <option value="">Pilih paket</option>
                         @foreach($packages as $package)
                             <option value="{{ $package->id }}">{{ $package->package_name }} — Rp {{ number_format($package->price_per_kg, 0, ',', '.') }}/kg</option>
@@ -49,7 +56,7 @@
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-slate-600">Jenis Layanan</label>
-                    <select wire:model.defer="service_type" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <select wire:model.defer="service_type" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                         <option value="regular">Regular (48 jam)</option>
                         <option value="express">Express (24 jam)</option>
                         <option value="kilat">Kilat (6 jam)</option>
@@ -57,32 +64,31 @@
                     @error('service_type') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-3 md:grid-cols-2">
                 <div>
                     <label class="text-sm font-semibold text-slate-600">Estimasi Berat (kg)</label>
-                    <input type="number" step="0.5" wire:model.defer="estimated_weight" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <input type="number" step="0.5" wire:model.defer="estimated_weight" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     @error('estimated_weight') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
-                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                    Status awal pesanan akan otomatis menjadi
-                    <span class="font-semibold text-slate-900">{{ $initialStatusLabel }}</span> dan hanya bisa maju sesuai alur.
+                <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-600">
+                    Status awal pesanan: <span class="font-semibold text-slate-900">{{ $initialStatusLabel }}</span>. Alur hanya bisa maju.
                 </div>
             </div>
             <div>
                 <label class="text-sm font-semibold text-slate-600">Metode Pembayaran</label>
                 <select wire:model.defer="payment_method"
-                        class="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        class="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                     @foreach($paymentMethods as $key => $label)
                         <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
                 </select>
-                <p class="mt-2 text-xs text-slate-500">Pembayaran QRIS akan membuka popup Midtrans dan pesanan tersimpan setelah lunas.</p>
+                <p class="mt-1 text-[11px] text-slate-500">Pembayaran QRIS akan membuka popup Midtrans dan pesanan tersimpan setelah lunas.</p>
                 @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-3 md:grid-cols-2">
                 <div>
                     <label class="text-sm font-semibold text-slate-600">Pickup / Delivery</label>
-                    <select wire:model.defer="pickup_or_delivery" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <select wire:model.defer="pickup_or_delivery" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
                         @foreach($pickupOptions as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
                         @endforeach
@@ -91,17 +97,20 @@
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-slate-600">Biaya Delivery</label>
-                    <input type="number" step="0.1" wire:model.defer="delivery_fee" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Opsional">
+                    <input type="number" step="0.1" wire:model.defer="delivery_fee" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Opsional">
                 </div>
             </div>
             <div>
                 <label class="text-sm font-semibold text-slate-600">Catatan</label>
-                <textarea wire:model.defer="notes" rows="3" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+                <textarea wire:model.defer="notes" rows="3" class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
             </div>
-            <button type="submit" class="w-full rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600" wire:loading.attr="disabled">
-                <span wire:loading.remove>Buat Pesanan</span>
-                <span wire:loading>Memproses...</span>
-            </button>
+            <div class="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-500">Pastikan data sudah benar sebelum simpan.</p>
+                <button type="submit" class="w-full rounded-xl border border-primary bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 sm:w-auto" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Buat Pesanan</span>
+                    <span wire:loading>Memproses...</span>
+                </button>
+            </div>
         </form>
     </div>
 </div>
