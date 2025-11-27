@@ -38,9 +38,8 @@
                 <iframe
                     title="Lokasi Laundry"
                     src="https://www.google.com/maps?q=maps.app.goo.gl/nPgsQ1A79ij54K8V6&output=embed"
-                    width="100%"
-                    height="320"
-                    style="border:0;"
+                    class="w-full"
+                    style="border:0; aspect-ratio: 4/3; min-height: 240px;"
                     allowfullscreen=""
                     loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade"></iframe>

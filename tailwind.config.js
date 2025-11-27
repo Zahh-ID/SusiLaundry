@@ -12,10 +12,11 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                primary: '#6366f1',
+                primary: '#7c3aed', // Violet 600
+                surface: '#f8fafc', // Slate 50
             },
         },
     },

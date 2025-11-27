@@ -1,6 +1,6 @@
 @php
-    $wrapperClass = $embedded ? 'mx-auto w-full max-w-2xl space-y-3' : 'mx-auto w-full max-w-3xl space-y-4';
-    $cardPadding = $embedded ? 'p-4 lg:p-5' : 'p-5';
+    $wrapperClass = $embedded ? 'mx-auto w-full max-w-xl sm:max-w-2xl space-y-3' : 'mx-auto w-full max-w-3xl space-y-4';
+    $cardPadding = $embedded ? 'p-4 md:p-5' : 'p-5';
 @endphp
 
 <div class="{{ $wrapperClass }}">

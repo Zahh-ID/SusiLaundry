@@ -20,8 +20,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $packages = Package::orderBy('price_per_kg')->take(3)->get();
+    $completedOrders = \App\Models\Order::where('status', 'completed')
+        ->latest()
+        ->take(3)
+        ->get();
 
-    return view('landing', compact('packages'));
+    return view('landing', compact('packages', 'completedOrders'));
 })->name('landing');
 
 Route::get('/paket', ShowPackages::class)->name('packages.index');
@@ -31,12 +35,12 @@ Route::view('/promo', 'pages.promo')->name('promo');
 Route::view('/tentang-kami', 'pages.about')->name('about');
 Route::view('/kontak', 'pages.contact')->name('contact');
 Route::get('/order/success/{code}', function (string $code) {
-    $order = \App\Models\Order::with(['customer', 'package', 'payments' => fn ($query) => $query->latest()])->where('order_code', $code)->firstOrFail();
+    $order = \App\Models\Order::with(['customer', 'package', 'payments' => fn($query) => $query->latest()])->where('order_code', $code)->firstOrFail();
 
     return view('order-success', compact('order'));
 })->name('order.success');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'prevent-back-history'])->group(function () {
     Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -64,4 +68,4 @@ Route::post('logout', function (Logout $logout) {
     return redirect('/');
 })->middleware('auth')->name('logout');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

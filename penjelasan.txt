@@ -1,0 +1,10 @@
+Penjelasan singkat (Laravel)
+1) Session handler: Laravel default memakai file driver (storage/framework/sessions). Bisa diubah via .env: SESSION_DRIVER=file|database|redis|array|cookie. Penyimpanan session menyimpan ID terenkripsi lalu diikat ke cookies browser.
+2) Autentikasi: Guard web memakai session + cookies untuk mengingat login. Middleware auth memeriksa session auth, lalu user diambil via guard. CSRF token dijaga di session.
+3) Cookies: Laravel mengirim cookie session (default name: laravel_session) yang sudah dienkripsi dan ditandatangani. Ada juga XSRF-TOKEN (tidak terenkripsi) untuk SPA/AJAX CSRF. Properti cookie dikontrol di config/session.php (http_only, secure, same_site).
+Cara ubah atau cek:
+- .env: atur SESSION_DRIVER, SESSION_LIFETIME, SESSION_DOMAIN, SESSION_SECURE_COOKIE, SESSION_SAME_SITE.
+- config/session.php: detail opsi path, domain, secure, samesite, dll.
+- Untuk database driver: jalankan `php artisan session:table` lalu migrasi.
+Alur umum login:
+- User kirim kredensial -> guard web autentikasi -> Laravel set session ID di storage -> kirim cookie laravel_session ke browser -> setiap request berikutnya memuat session yang sama untuk identitas user.

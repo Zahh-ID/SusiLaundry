@@ -1,139 +1,165 @@
 <div class="space-y-8">
-    <div>
-        <p class="text-sm font-semibold text-primary">Ringkasan Operasional</p>
-        <h1 class="text-3xl font-bold text-slate-900">Dashboard Admin</h1>
-        <p class="text-sm text-slate-500">Pantau status laundry, pendapatan, dan performa paket terbaru.</p>
+    {{-- Header --}}
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+            <p class="text-sm text-slate-500">Selamat datang kembali, {{ auth()->user()->name }}!</p>
+        </div>
+        <a href="{{ route('admin.orders.create') }}"
+            class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path
+                    d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+            </svg>
+            Buat Pesanan Baru
+        </a>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-2xl bg-white p-5 shadow-sm">
-            <p class="text-sm text-slate-500">Total Pesanan</p>
-            <p class="text-3xl font-bold text-slate-900">{{ $metrics['totalOrders'] }}</p>
+    {{-- Stats Grid --}}
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {{-- Total Orders --}}
+        <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+            <dt class="truncate text-sm font-medium text-slate-500">Total Pesanan</dt>
+            <dd class="mt-2 flex items-baseline gap-2">
+                <span class="text-3xl font-semibold text-slate-900">{{ $metrics['totalOrders'] }}</span>
+                <span class="text-xs text-slate-500">transaksi</span>
+            </dd>
         </div>
-        <div class="rounded-2xl bg-white p-5 shadow-sm">
-            <p class="text-sm text-slate-500">Hari Ini</p>
-            <p class="text-3xl font-bold text-primary">{{ $metrics['todayOrders'] }}</p>
-        </div>
-        <div class="rounded-2xl bg-white p-5 shadow-sm">
-            <p class="text-sm text-slate-500">Minggu Ini</p>
-            <p class="text-3xl font-bold text-amber-500">{{ $metrics['weekOrders'] }}</p>
-        </div>
-        <div class="rounded-2xl bg-white p-5 shadow-sm">
-            <p class="text-sm text-slate-500">Bulan Ini</p>
-            <p class="text-3xl font-bold text-emerald-500">{{ $metrics['monthOrders'] }}</p>
-        </div>
-    </div>
 
-    <div class="grid gap-4 lg:grid-cols-2">
-        <div class="rounded-2xl bg-white p-6 shadow-sm">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <p class="text-sm font-semibold text-slate-500">Pendapatan Bulanan</p>
-                    <p class="text-4xl font-bold text-slate-900">Rp {{ number_format($metrics['monthlyRevenue'], 0, ',', '.') }}</p>
-                </div>
-                <a href="{{ route('admin.reports.index') }}" class="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20">
-                    Lihat laporan
-                </a>
-            </div>
-            <div class="mt-6 grid gap-4 md:grid-cols-2">
-                <div>
-                    <p class="text-xs uppercase text-slate-400">Order Express</p>
-                    <p class="text-2xl font-bold text-slate-900">{{ $metrics['express'] }}</p>
-                </div>
-                <div>
-                    <p class="text-xs uppercase text-slate-400">Rata-rata berat</p>
-                    <p class="text-2xl font-bold text-slate-900">{{ $metrics['averageWeight'] }} kg</p>
-                </div>
-            </div>
+        {{-- Today's Orders --}}
+        <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+            <dt class="truncate text-sm font-medium text-slate-500">Pesanan Hari Ini</dt>
+            <dd class="mt-2 flex items-baseline gap-2">
+                <span class="text-3xl font-semibold text-indigo-600">{{ $metrics['todayOrders'] }}</span>
+                @if($metrics['todayOrders'] > 0)
+                    <span
+                        class="inline-flex items-baseline rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 md:mt-2 lg:mt-0">
+                        <svg class="-ml-1 mr-0.5 h-4 w-4 flex-shrink-0 self-center text-green-500" fill="currentColor"
+                            viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Active
+                    </span>
+                @endif
+            </dd>
         </div>
-        <div class="rounded-2xl bg-white p-6 shadow-sm">
-            <p class="text-sm font-semibold text-slate-500">Quick Actions</p>
-            <div class="mt-4 grid gap-3 md:grid-cols-2">
-                <a href="{{ route('admin.orders.create') }}" class="rounded-2xl border border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">Tambah Pesanan Manual</a>
-                <a href="{{ route('admin.orders.index') }}" class="rounded-2xl border border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">Kelola Pesanan</a>
-                <a href="{{ route('admin.packages.index') }}" class="rounded-2xl border border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">Kelola Harga & Layanan</a>
-                <a href="{{ route('admin.reports.index') }}" class="rounded-2xl border border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">Laporan Transaksi</a>
-                <a href="{{ route('admin.customers.index') }}" class="rounded-2xl border border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">Database Pelanggan</a>
-            </div>
-        </div>
-    </div>
 
-    <div class="grid gap-6 lg:grid-cols-3">
-        <div class="rounded-2xl bg-white p-6 shadow-sm lg:col-span-2">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <p class="text-sm font-semibold text-slate-500">Pendapatan tercatat</p>
-                    <p class="text-4xl font-bold text-slate-900">Rp {{ number_format($metrics['revenue'], 0, ',', '.') }}</p>
-                </div>
-                <a href="{{ route('admin.orders.index') }}" class="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/20">
-                    Lihat Transaksi
-                </a>
-            </div>
-            <div class="mt-6 grid gap-4 md:grid-cols-2">
-                <div class="rounded-2xl border border-slate-100 p-4">
-                    <p class="text-xs uppercase text-slate-400">Order Express</p>
-                    <p class="text-2xl font-bold text-slate-900">{{ $metrics['express'] }}</p>
-                </div>
-                <div class="rounded-2xl border border-slate-100 p-4">
-                    <p class="text-xs uppercase text-slate-400">Rata-rata berat</p>
-                    <p class="text-2xl font-bold text-slate-900">{{ number_format($metrics['averageWeight'], 1) }} kg</p>
-                </div>
-            </div>
+        {{-- Revenue --}}
+        <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+            <dt class="truncate text-sm font-medium text-slate-500">Pendapatan Bulan Ini</dt>
+            <dd class="mt-2 flex items-baseline gap-2">
+                <span class="text-3xl font-semibold text-slate-900">Rp
+                    {{ number_format($metrics['monthlyRevenue'] / 1000, 0, ',', '.') }}k</span>
+            </dd>
         </div>
-        <div class="rounded-2xl bg-white p-6 shadow-sm">
-            <p class="text-sm font-semibold text-slate-500">Paket Teratas</p>
-            <p class="text-3xl font-bold text-slate-900">{{ $packages->count() }}</p>
-            <ul class="mt-4 space-y-3 text-sm text-slate-600">
-                @foreach ($packages->take(3) as $package)
-                    <li class="flex items-center justify-between rounded-xl border border-slate-100 px-3 py-2">
-                        <span>{{ $package->package_name }}</span>
-                        <span class="font-semibold">Rp {{ number_format($package->price_per_kg, 0, ',', '.') }}</span>
-                    </li>
-                @endforeach
-            </ul>
-            <a href="{{ route('admin.packages.index') }}" class="mt-5 inline-block text-sm font-semibold text-primary hover:text-indigo-600">
-                Kelola paket →
-            </a>
+
+        {{-- Active Orders (Processing) --}}
+        <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
+            <dt class="truncate text-sm font-medium text-slate-500">Sedang Proses</dt>
+            <dd class="mt-2 flex items-baseline gap-2">
+                <span
+                    class="text-3xl font-semibold text-amber-500">{{ $metrics['statusCounts']['processing'] ?? 0 }}</span>
+                <span class="text-xs text-slate-500">cucian</span>
+            </dd>
         </div>
     </div>
 
-    <div class="rounded-2xl bg-white p-6 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-4">
+    {{-- Main Content Grid --}}
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        {{-- Recent Orders Table (Span 2) --}}
+        <div class="lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold leading-6 text-slate-900">Pesanan Terbaru</h2>
+                <a href="{{ route('admin.orders.index') }}"
+                    class="text-sm font-semibold text-indigo-600 hover:text-indigo-500">Lihat semua <span
+                        aria-hidden="true">&rarr;</span></a>
+            </div>
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    Order ID</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    Pelanggan</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                            @forelse ($recentOrders as $order)
+                                                        <tr>
+                                                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-indigo-600">
+                                                                <a href="{{ route('admin.orders.edit', $order) }}"
+                                                                    class="hover:underline">{{ $order->order_code }}</a>
+                                                            </td>
+                                                            <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-900">
+                                                                {{ $order->customer?->name ?? 'Guest' }}
+                                                                <div class="text-xs text-slate-500">{{ $order->package?->package_name }}</div>
+                                                            </td>
+                                                            <td class="whitespace-nowrap px-6 py-4 text-sm">
+                                                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                                                                        {{ match ($order->status) {
+                                    'completed' => 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20',
+                                    'processing', 'washing' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10',
+                                    'pending' => 'bg-yellow-50 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',
+                                    'cancelled' => 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10',
+                                    default => 'bg-slate-50 text-slate-600 ring-1 ring-inset ring-slate-500/10',
+                                } }}">
+                                                                    {{ ucfirst($order->status) }}
+                                                                </span>
+                                                            </td>
+                                                            <td class="whitespace-nowrap px-6 py-4 text-right text-sm text-slate-500">
+                                                                Rp {{ number_format($order->total_price, 0, ',', '.') }}
+                                                            </td>
+                                                        </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-sm text-slate-500">
+                                        Belum ada pesanan terbaru.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- Side Widgets --}}
+        <div class="space-y-8">
+            {{-- Package Performance --}}
             <div>
-                <h2 class="text-xl font-bold text-slate-900">Pesanan Terbaru</h2>
-                <p class="text-sm text-slate-500">5 transaksi terakhir beserta statusnya.</p>
+                <h3 class="text-base font-semibold leading-6 text-slate-900 mb-4">Paket Terlaris</h3>
+                <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                    <ul role="list" class="divide-y divide-slate-100">
+                        @foreach ($packages->take(5) as $package)
+                            <li class="flex items-center justify-between gap-x-6 px-6 py-4 hover:bg-slate-50">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold leading-6 text-slate-900">{{ $package->package_name }}
+                                    </p>
+                                    <p class="mt-1 truncate text-xs leading-5 text-slate-500">Rp
+                                        {{ number_format($package->price_per_kg, 0, ',', '.') }} /
+                                        {{ $package->billing_type == 'per_kg' ? 'kg' : 'item' }}</p>
+                                </div>
+                                <div class="flex flex-none items-center gap-x-4">
+                                    <a href="{{ route('admin.packages.edit', $package) }}"
+                                        class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:block">Edit</a>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
-            <a href="{{ route('admin.orders.index') }}" class="text-sm font-semibold text-primary hover:text-indigo-600">
-                Lihat semua
-            </a>
-        </div>
-        <div class="mt-6 divide-y divide-slate-100 text-sm">
-            @forelse ($recentOrders as $order)
-                <div class="flex flex-col gap-2 py-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p class="font-semibold text-slate-900">{{ $order->customer?->name }}</p>
-                        <p class="text-xs text-slate-500">{{ $order->package?->package_name }} • {{ $order->order_code }}</p>
-                    </div>
-                    <div class="flex items-center gap-6">
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">{{ $order->status_label }}</span>
-                        <span class="font-semibold">Rp {{ number_format($order->total_price ?? 0, 0, ',', '.') }}</span>
-                    </div>
-                </div>
-            @empty
-                <p class="py-6 text-center text-sm text-slate-500">Belum ada transaksi.</p>
-            @endforelse
-        </div>
-    </div>
-
-    <div class="rounded-2xl bg-white p-6 shadow-sm">
-        <h2 class="text-xl font-bold text-slate-900">Status Pesanan</h2>
-        <div class="mt-4 grid gap-3 md:grid-cols-4">
-            @foreach($statuses as $key => $label)
-                <div class="rounded-2xl border border-slate-100 p-3 text-sm">
-                    <p class="text-slate-500">{{ $label }}</p>
-                    <p class="text-2xl font-bold text-slate-900">{{ $metrics['statusCounts'][$key] ?? 0 }}</p>
-                </div>
-            @endforeach
         </div>
     </div>
 </div>
