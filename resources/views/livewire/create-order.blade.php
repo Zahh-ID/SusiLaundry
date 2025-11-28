@@ -1,127 +1,210 @@
-<div class="mx-auto grid w-full max-w-6xl gap-12 px-6 py-16 lg:grid-cols-2">
-    <div>
-        <p class="text-sm font-semibold text-primary">Form Pemesanan</p>
-        <h1 class="mb-3 text-4xl font-bold text-slate-900">Laundry kamu kami urus</h1>
-        <p class="text-slate-600">
-            Isi data dengan benar dan tim kami akan menghubungi maksimal 5 menit setelah form dikirim melalui email.
-        </p>
-        <div class="mt-10 rounded-3xl border border-slate-100 bg-blue-50/60 p-6 text-sm text-slate-600">
-            <p class="font-semibold text-slate-900">Panduan cepat:</p>
-            <ul class="mt-4 list-disc space-y-1 pl-5">
-                <li>Minimal order 3 kg untuk layanan antar jemput.</li>
-                <li>Berat aktual dan total biaya akan dikonfirmasi setelah cucian ditimbang.</li>
-                <li>Kode tracking otomatis dikirim via email.</li>
-            </ul>
+<div class="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+    {{-- Header --}}
+    <div class="mb-10 text-center">
+        <h1 class="text-3xl font-bold text-slate-900 sm:text-4xl">Buat Pesanan Baru</h1>
+        <p class="mt-2 text-slate-600">Lengkapi data dalam 3 langkah mudah</p>
+    </div>
+
+    {{-- Progress Steps --}}
+    <div class="mb-12">
+        <div class="relative flex justify-between">
+            <div class="absolute left-0 top-1/2 -z-10 h-1 w-full -translate-y-1/2 bg-slate-100 rounded-full"></div>
+            <div class="absolute left-0 top-1/2 -z-10 h-1 -translate-y-1/2 bg-primary transition-all duration-500 rounded-full"
+                 style="width: {{ ($step - 1) * 50 }}%"></div>
+
+            @foreach(['Layanan', 'Detail', 'Konfirmasi'] as $index => $label)
+                @php $stepNum = $index + 1; @endphp
+                <div class="flex flex-col items-center gap-2 bg-white px-2">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300
+                        {{ $step >= $stepNum ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-400' }}">
+                        @if($step > $stepNum)
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        @else
+                            <span class="font-bold">{{ $stepNum }}</span>
+                        @endif
+                    </div>
+                    <span class="text-xs font-semibold {{ $step >= $stepNum ? 'text-primary' : 'text-slate-400' }}">{{ $label }}</span>
+                </div>
+            @endforeach
         </div>
     </div>
-    <div class="rounded-3xl border border-slate-100 bg-white p-8 shadow-soft">
-        @if(session()->has('error'))
-            <div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
-                {{ session('error') }}
-            </div>
-        @endif
-        <form class="space-y-5" wire:submit.prevent="save">
-            <div>
-                <label for="name" class="text-sm font-semibold text-slate-600">Nama Lengkap</label>
-                <input type="text" id="name" wire:model.defer="name" placeholder="Contoh: Ayu Lestari"
-                       class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                @error('name') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-            </div>
-            <div>
-                <label for="email" class="text-sm font-semibold text-slate-600">Email Aktif</label>
-                <input type="email" id="email" wire:model.defer="email" placeholder="nama@email.com"
-                       class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                @error('email') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-            </div>
-            <div>
-                <label for="address" class="text-sm font-semibold text-slate-600">Alamat Penjemputan</label>
-                <textarea id="address" wire:model.defer="address" rows="3" placeholder="Tulis alamat lengkap"
-                          class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
-                @error('address') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-            </div>
-            <div>
-                <label for="package_id" class="text-sm font-semibold text-slate-600">Paket Laundry</label>
-                <select id="package_id" wire:model.defer="package_id"
-                        class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <option value="">Pilih paket</option>
-                    @foreach($packages as $package)
-                        <option value="{{ $package->id }}">
-                            {{ $package->package_name }} — Rp {{ number_format($package->price_per_kg, 0, ',', '.') }}
-                            @if($package->billing_type === 'per_item')
-                                /item
-                            @elseif($package->billing_type === 'paket')
-                                /paket
-                            @else
-                                /kg
+
+    <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/50 sm:p-10">
+        <form wire:submit.prevent="save">
+            
+            {{-- Step 1: Layanan --}}
+            @if($step === 1)
+                <div class="space-y-8 animate-fade-in-up">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Pilih Paket Laundry</h2>
+                        <p class="text-sm text-slate-500">Sesuaikan dengan kebutuhan pakaianmu</p>
+                        
+                        <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach($packages as $package)
+                                <div class="relative cursor-pointer rounded-2xl border-2 p-4 transition-all hover:border-primary/50
+                                    {{ $package_id == $package->id ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-slate-100 bg-white' }}"
+                                    wire:click="setPackage({{ $package->id }})">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <p class="font-bold text-slate-900">{{ $package->package_name }}</p>
+                                            <p class="text-xs text-slate-500 mt-1">{{ $package->turnaround_hours }} Jam Kerja</p>
+                                        </div>
+                                        @if($package_id == $package->id)
+                                            <div class="h-5 w-5 rounded-full bg-primary text-white flex items-center justify-center">
+                                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <p class="mt-4 text-lg font-bold text-primary">
+                                        Rp {{ number_format($package->price_per_kg, 0, ',', '.') }}
+                                        <span class="text-xs font-normal text-slate-500">/{{ $package->billing_type === 'per_item' ? 'item' : 'kg' }}</span>
+                                    </p>
+                                </div>
+                            @endforeach
+                        </div>
+                        @error('package_id') <span class="mt-2 text-sm text-red-500 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="grid gap-8 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">Estimasi Berat (kg/item)</label>
+                            <div class="relative">
+                                <input type="number" step="0.5" wire:model.live="estimated_weight" placeholder="0"
+                                    class="w-full rounded-xl border-slate-200 px-4 py-3 text-lg font-bold text-slate-900 focus:border-primary focus:ring-primary">
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">Kg</div>
+                            </div>
+                            @error('estimated_weight') <span class="mt-1 text-sm text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+
+                    </div>
+                </div>
+            @endif
+
+            {{-- Step 2: Detail --}}
+            @if($step === 2)
+                <div class="space-y-6 animate-fade-in-up">
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Nama Lengkap</label>
+                            <input type="text" wire:model="name" class="w-full rounded-xl border-slate-200 focus:border-primary focus:ring-primary" placeholder="Nama Anda">
+                            @error('name') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Email</label>
+                            <input type="email" wire:model="email" class="w-full rounded-xl border-slate-200 focus:border-primary focus:ring-primary" placeholder="email@contoh.com">
+                            @error('email') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Alamat Lengkap</label>
+                        <textarea wire:model="address" rows="3" class="w-full rounded-xl border-slate-200 focus:border-primary focus:ring-primary" placeholder="Jalan, Nomor Rumah, Patokan..."></textarea>
+                        @error('address') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="grid gap-6 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Opsi Pengiriman</label>
+                            <select wire:model.live="pickup_or_delivery" class="w-full rounded-xl border-slate-200 focus:border-primary focus:ring-primary">
+                                <option value="none">Antar Sendiri ke Outlet</option>
+                                <option value="pickup">Jemput Saja</option>
+                                <option value="delivery">Antar Jemput (Lengkap)</option>
+                            </select>
+                            @if($pickup_or_delivery === 'delivery')
+                                <p class="mt-1 text-xs text-primary font-medium">+ Rp 10.000 biaya antar</p>
                             @endif
-                        </option>
-                    @endforeach
-                </select>
-                @error('package_id') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label for="estimated_weight" class="text-sm font-semibold text-slate-600">Estimasi Berat (kg)</label>
-                    <input type="number" step="0.5" id="estimated_weight" wire:model.defer="estimated_weight" placeholder="Misal 5"
-                           class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    @error('estimated_weight') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Catatan Khusus (Opsional)</label>
+                            <input type="text" wire:model="notes" class="w-full rounded-xl border-slate-200 focus:border-primary focus:ring-primary" placeholder="Misal: Jangan dicampur...">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="service_type" class="text-sm font-semibold text-slate-600">Jenis Layanan</label>
-                    <select id="service_type" wire:model.defer="service_type"
-                            class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        <option value="regular">Regular (48 jam)</option>
-                        <option value="express">Express (24 jam)</option>
-                        <option value="kilat">Kilat (6 jam)</option>
-                    </select>
-                    @error('service_type') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+            @endif
+
+            {{-- Step 3: Review --}}
+            @if($step === 3)
+                <div class="animate-fade-in-up">
+                    <div class="rounded-2xl bg-slate-50 p-6 border border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-900 mb-4">Ringkasan Pesanan</h3>
+                        
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Paket Laundry</span>
+                                <span class="font-semibold text-slate-900">{{ $packages->find($package_id)->package_name }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Estimasi Berat</span>
+                                <span class="font-semibold text-slate-900">{{ $estimated_weight }} Kg</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Pengiriman</span>
+                                <span class="font-semibold text-slate-900 capitalize">{{ $pickup_or_delivery === 'none' ? 'Mandiri' : $pickup_or_delivery }}</span>
+                            </div>
+                            
+                            <div class="border-t border-slate-200 my-3 pt-3 flex justify-between items-center">
+                                <span class="font-bold text-slate-700">Total Estimasi</span>
+                                <span class="text-xl font-bold text-primary">Rp {{ number_format($this->totalPrice, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Metode Pembayaran</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="cursor-pointer relative" wire:click="setPaymentMethod('cash')">
+                                <div class="rounded-xl border-2 p-4 transition-all {{ $payment_method === 'cash' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:bg-slate-50' }}">
+                                    <div class="font-bold text-slate-900">Tunai (Cash)</div>
+                                    <div class="text-xs text-slate-500">Bayar saat selesai/antar</div>
+                                </div>
+                                @if($payment_method === 'cash')
+                                    <div class="absolute top-4 right-4 text-primary">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="cursor-pointer relative" wire:click="setPaymentMethod('qris')">
+                                <div class="rounded-xl border-2 p-4 transition-all {{ $payment_method === 'qris' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:bg-slate-50' }}">
+                                    <div class="font-bold text-slate-900">QRIS</div>
+                                    <div class="text-xs text-slate-500">Scan barcode instan</div>
+                                </div>
+                                @if($payment_method === 'qris')
+                                    <div class="absolute top-4 right-4 text-primary">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        @error('payment_method') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                    </div>
                 </div>
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                    <label for="pickup_or_delivery" class="text-sm font-semibold text-slate-600">Pickup / Delivery</label>
-                    <select id="pickup_or_delivery" wire:model.defer="pickup_or_delivery"
-                            class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                        @foreach($pickupOptions as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    @error('pickup_or_delivery') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                </div>
-                <div class="rounded-2xl border border-dashed border-slate-200 p-4 text-xs text-slate-500">
-                    Pickup & delivery tersedia gratis untuk area dalam kota dengan minimal 3kg. Pilih "Antar ke Pelanggan" jika ingin pesanan dikirim kembali.
-                </div>
-            </div>
-            <div>
-                <label for="payment_method" class="text-sm font-semibold text-slate-600">Metode Pembayaran</label>
-                <select id="payment_method" wire:model.defer="payment_method"
-                        class="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    @foreach($paymentMethods as $key => $label)
-                        <option value="{{ $key }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-                <p class="mt-2 text-xs text-slate-500">
-                    Pilih QRIS bila ingin membayar non-tunai saat pesanan dikonfirmasi. Pembayaran tunai akan dilakukan ketika kurir pickup/delivery.
-                </p>
-                @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-            </div>
-            <div>
-                <label for="notes" class="text-sm font-semibold text-slate-600">Catatan Tambahan</label>
-                <textarea id="notes" wire:model.defer="notes" rows="3" placeholder="Contoh: tolong pisahkan pakaian putih"
-                          class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
-                @error('notes') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-            </div>
-            <div class="flex flex-col gap-3 md:flex-row">
-                <button type="submit" class="flex-1 rounded-2xl border border-primary bg-primary px-4 py-3 font-semibold text-white hover:bg-indigo-600" wire:loading.attr="disabled">
-                    <span wire:loading.remove>Kirim Pemesanan</span>
-                    <span wire:loading>Memproses...</span>
-                </button>
-                <button type="button" wire:click="resetForm" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 hover:border-primary hover:text-primary">
-                    Reset Form
-                </button>
-                <a href="{{ route('landing') }}" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
-                    Kembali
-                </a>
+            @endif
+
+            {{-- Navigation Buttons --}}
+            <div class="mt-10 flex justify-between pt-6 border-t border-slate-100">
+                @if($step > 1)
+                    <button type="button" wire:click="prevStep"
+                        class="rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                        Kembali
+                    </button>
+                @else
+                    <div></div> {{-- Spacer --}}
+                @endif
+
+                @if($step < 3)
+                    <button type="button" wire:click="nextStep"
+                        class="rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-indigo-600 transition-all hover:scale-[1.02]">
+                        Lanjut
+                    </button>
+                @else
+                    <button type="submit"
+                        class="rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-indigo-600 transition-all hover:scale-[1.02]">
+                        Kirim Pesanan
+                    </button>
+                @endif
             </div>
         </form>
     </div>

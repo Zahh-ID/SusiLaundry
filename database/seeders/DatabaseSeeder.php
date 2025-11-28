@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PackageSeeder::class,
-            CustomerOrderSeeder::class,
+            BulkDatabaseSeeder::class,
         ]);
 
         User::updateOrCreate(
