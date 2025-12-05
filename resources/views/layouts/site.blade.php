@@ -59,25 +59,25 @@
                 <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-4">
                     <div class="rounded-2xl border border-slate-200 bg-white/95 shadow-sm divide-y divide-slate-100">
                         <div class="flex flex-col">
-                            <a href="{{ route('landing') }}#layanan"
+                            <a href="{{ route('landing') }}#layanan" @click="mobileNav = false"
                                 class="px-4 py-3 text-sm font-semibold text-slate-700 hover:text-primary">Layanan</a>
-                            <a href="{{ route('landing') }}#paket"
+                            <a href="{{ route('landing') }}#paket" @click="mobileNav = false"
                                 class="px-4 py-3 text-sm font-semibold text-slate-700 hover:text-primary">Harga</a>
 
-                            <a href="{{ route('about') }}"
+                            <a href="{{ route('about') }}" @click="mobileNav = false"
                                 class="px-4 py-3 text-sm font-semibold text-slate-700 hover:text-primary">Tentang
                                 Kami</a>
-                            <a href="{{ route('contact') }}"
+                            <a href="{{ route('contact') }}" @click="mobileNav = false"
                                 class="px-4 py-3 text-sm font-semibold text-slate-700 hover:text-primary">Kontak</a>
 
                         </div>
                         <div class="grid grid-cols-1 gap-3 px-4 py-3">
 
-                            <a href="{{ route('tracking') }}"
+                            <a href="{{ route('tracking') }}" @click="mobileNav = false"
                                 class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
                                 Cek Status
                             </a>
-                            <a href="{{ route('order.create') }}"
+                            <a href="{{ route('order.create') }}" @click="mobileNav = false"
                                 class="inline-flex items-center justify-center rounded-full border border-primary bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-soft hover:bg-indigo-500">
                                 Pesan Sekarang
                             </a>

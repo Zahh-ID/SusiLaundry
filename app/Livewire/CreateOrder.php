@@ -44,11 +44,6 @@ class CreateOrder extends Component
         $this->package_id = $id;
     }
 
-    public function setPaymentMethod($method)
-    {
-        $this->payment_method = $method;
-    }
-
     protected function validateStep($step)
     {
         if ($step === 1) {
@@ -69,18 +64,7 @@ class CreateOrder extends Component
 
     public function save()
     {
-        if ($this->step < 3) {
-            $this->nextStep();
-            return;
-        }
-
         $this->validate([
-            'package_id' => 'required|exists:packages,id',
-            'estimated_weight' => 'required|numeric|min:1',
-            'name' => 'required|string|min:3',
-            'email' => 'required|email',
-            'address' => 'required|string|min:10',
-            'pickup_or_delivery' => 'required|in:none,pickup,delivery',
             'payment_method' => 'required|in:cash,qris',
         ]);
 

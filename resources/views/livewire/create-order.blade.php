@@ -155,28 +155,20 @@
                     <div class="mt-6">
                         <label class="block text-sm font-semibold text-slate-700 mb-3">Metode Pembayaran</label>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="cursor-pointer relative" wire:click="setPaymentMethod('cash')">
-                                <div class="rounded-xl border-2 p-4 transition-all {{ $payment_method === 'cash' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:bg-slate-50' }}">
+                            <label class="cursor-pointer relative">
+                                <input type="radio" wire:model="payment_method" value="cash" class="peer sr-only">
+                                <div class="rounded-xl border-2 border-slate-200 p-4 hover:bg-slate-50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
                                     <div class="font-bold text-slate-900">Tunai (Cash)</div>
                                     <div class="text-xs text-slate-500">Bayar saat selesai/antar</div>
                                 </div>
-                                @if($payment_method === 'cash')
-                                    <div class="absolute top-4 right-4 text-primary">
-                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="cursor-pointer relative" wire:click="setPaymentMethod('qris')">
-                                <div class="rounded-xl border-2 p-4 transition-all {{ $payment_method === 'qris' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:bg-slate-50' }}">
+                            </label>
+                            <label class="cursor-pointer relative">
+                                <input type="radio" wire:model="payment_method" value="qris" class="peer sr-only">
+                                <div class="rounded-xl border-2 border-slate-200 p-4 hover:bg-slate-50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
                                     <div class="font-bold text-slate-900">QRIS</div>
                                     <div class="text-xs text-slate-500">Scan barcode instan</div>
                                 </div>
-                                @if($payment_method === 'qris')
-                                    <div class="absolute top-4 right-4 text-primary">
-                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                    </div>
-                                @endif
-                            </div>
+                            </label>
                         </div>
                         @error('payment_method') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
                     </div>
