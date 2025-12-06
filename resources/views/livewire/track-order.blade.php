@@ -116,7 +116,12 @@
                     </ul>
                 </div>
                 @if($order->payment_method === 'qris')
-                    @if($order->payment_status === 'paid')
+                    @if($order->status === 'pending_confirmation')
+                        <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-center">
+                            <p class="text-sm font-semibold text-blue-800">Menunggu Konfirmasi Laundry</p>
+                            <p class="text-xs text-blue-600 mt-1">QRIS akan muncul setelah pesanan diproses oleh admin.</p>
+                        </div>
+                    @elseif($order->payment_status === 'paid')
                         <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center">
                             <div
                                 class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-2">
@@ -126,11 +131,6 @@
                             </div>
                             <p class="text-sm font-bold text-emerald-800">Pembayaran Berhasil</p>
                             <p class="text-xs text-emerald-600">Terima kasih, pembayaran Anda telah terkonfirmasi.</p>
-                        </div>
-                    @elseif($order->status === 'pending_confirmation')
-                        <div class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-center">
-                            <p class="text-sm font-semibold text-blue-800">Menunggu Konfirmasi Laundry</p>
-                            <p class="text-xs text-blue-600 mt-1">QRIS akan muncul setelah pesanan diproses oleh admin.</p>
                         </div>
                     @else
                         @php
