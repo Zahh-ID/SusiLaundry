@@ -8,6 +8,18 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
+    public $showCreateOrderModal = false;
+
+    public function openCreateOrderModal()
+    {
+        $this->showCreateOrderModal = true;
+    }
+
+    public function closeCreateOrderModal()
+    {
+        $this->showCreateOrderModal = false;
+    }
+
     public function render()
     {
         $today = now()->startOfDay();

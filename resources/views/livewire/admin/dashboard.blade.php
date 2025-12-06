@@ -5,14 +5,14 @@
             <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
             <p class="text-sm text-slate-500">Selamat datang kembali, {{ auth()->user()->name }}!</p>
         </div>
-        <a href="{{ route('admin.orders.create') }}"
+        <button wire:click="openCreateOrderModal"
             class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path
                     d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
             </svg>
             Buat Pesanan Baru
-        </a>
+        </button>
     </div>
 
     {{-- Stats Grid --}}
@@ -108,7 +108,7 @@
                                                             </td>
                                                             <td class="whitespace-nowrap px-6 py-4 text-sm">
                                                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                                                                                    {{ match ($order->status) {
+                                                                                                                                                            {{ match ($order->status) {
                                     'completed' => 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20',
                                     'processing', 'washing' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10',
                                     'pending' => 'bg-yellow-50 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',
@@ -163,4 +163,26 @@
             </div>
         </div>
     </div>
+
+    {{-- Create Order Modal --}}
+    @if($showCreateOrderModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-3 py-5">
+            <div
+                class="relative w-full max-w-4xl h-[88vh] max-h-[90vh] overflow-hidden rounded-3xl bg-white shadow-2xl animate-fade-in-up">
+                <button type="button"
+                    class="absolute right-6 top-6 z-10 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow hover:border-primary hover:text-primary"
+                    wire:click="closeCreateOrderModal">
+                    ✕ <span>Tutup</span>
+                </button>
+                <div class="h-full overflow-y-auto p-6">
+                    <livewire:admin.order.create :embedded="true" wire:key="dashboard-create-order" />
+                </div>
+            </div>
+            <style>
+                body {
+                    overflow: hidden;
+                }
+            </style>
+        </div>
+    @endif
 </div>

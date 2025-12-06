@@ -8,7 +8,6 @@ use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\Order\Create as AdminOrderCreate;
 use App\Livewire\Admin\Order\Edit as AdminOrderEdit;
 use App\Livewire\Admin\Order\Index as AdminOrderIndex;
-use App\Livewire\Admin\Package\Create as AdminPackageCreate;
 use App\Livewire\Admin\Package\Edit as AdminPackageEdit;
 use App\Livewire\Admin\Package\Index as AdminPackageIndex;
 use App\Livewire\Admin\Report\Index as AdminReportIndex;
@@ -50,7 +49,6 @@ Route::middleware(['auth', 'verified', 'prevent-back-history'])->group(function 
         Route::get('/orders/create', AdminOrderCreate::class)->name('orders.create');
         Route::get('/orders/{order}/print', OrderPrintController::class)->name('orders.print');
         Route::get('/packages', AdminPackageIndex::class)->name('packages.index');
-        Route::get('/packages/create', AdminPackageCreate::class)->name('packages.create');
         Route::get('/packages/{package}/edit', AdminPackageEdit::class)->name('packages.edit');
         Route::get('/customers', AdminCustomerIndex::class)->name('customers.index');
         Route::get('/reports', AdminReportIndex::class)->name('reports.index');
