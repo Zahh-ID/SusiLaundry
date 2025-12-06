@@ -14,15 +14,15 @@
                 <p class="mt-3 text-2xl font-bold text-slate-900">+62 856-455-206-20</p>
                 <p class="mt-2 text-sm text-slate-600">Respons maksimal 5 menit.</p>
             </a>
-            <a href="tel:+62211234567"
+            <a href="tel:085645520620"
                 class="rounded-3xl border border-slate-100 bg-white p-6 text-center shadow-soft hover:border-primary">
                 <p class="text-sm font-semibold text-primary">Telepon</p>
-                <p class="mt-3 text-2xl font-bold text-slate-900">(021) 123-4567</p>
+                <p class="mt-3 text-2xl font-bold text-slate-900">0856-4552-0620</p>
                 <p class="mt-2 text-sm text-slate-600">Jam kerja 08.00 - 21.00.</p>
             </a>
             <div class="rounded-3xl border border-slate-100 bg-white p-6 text-center shadow-soft">
                 <p class="text-sm font-semibold text-primary">Email</p>
-                <p class="mt-3 text-2xl font-bold text-slate-900">halo@susilaundry.id</p>
+                <p class="mt-3 text-2xl font-bold text-slate-900">halo@susilaundry.paulfjr.my.id</p>
                 <p class="mt-2 text-sm text-slate-600">Respon maksimal 1x24 jam.</p>
             </div>
         </div>
