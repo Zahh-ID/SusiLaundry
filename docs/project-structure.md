@@ -1,36 +1,34 @@
-# Project Structure Guide
+# Panduan Struktur Folder Proyek
 
-This guide explains where key files are located in the Susi Laundry codebase, helping developers understand the organization.
+Untuk kamu yang ingin mengutak-atik kodenya, ini peta lokasi file-file penting di Susi Laundry.
 
-## Root Directory
-*   `app/`: Core application code (Models, Controllers, Livewire).
-*   `config/`: Configuration files (e.g., `orders.php` for status lists).
-*   `database/`: Database tools.
-    *   `migrations/`: Files to create/modify DB tables.
-    *   `seeders/`: Fake data for testing.
-*   `public/`: Accessible from the web (images, compiled assets).
-*   `resources/`: Raw assets.
-    *   `views/`: HTML Templates (Blade files).
-*   `routes/`: URL definitions (`web.php`).
-*   `tests/`: Automated tests.
+## Folder Utama
+*   `app/`: **Dapur Utama**. Semua logika pemrograman (PHP) ada di sini.
+*   `resources/`: **Bahan Mentah Tampilan**. File HTML (Blade) dan CSS ada di sini.
+*   `database/`: **Gudang Data**. File untuk mengatur tabel database.
+*   `routes/`: **Gerbang Pintu**. Mengatur alamat website (misal: `/admin` arahnya kemana).
+*   `public/`: **Etalase**. File yang bisa diakses publik seperti gambar logo `images/`.
 
-## Key Application Directories (`app/`)
-*   `app/Models/`: **M** (Model) - Database representations.
-    *   `Order.php`, `Customer.php`.
-*   `app/Livewire/`: **C** (Controller/Component) - Logic for dynamic pages.
-    *   `Admin/`: Admin-specific logic (e.g., `Order/Create.php`).
-    *   `TrackOrder.php`: Public tracking logic.
+## Di mana saya harus mengedit?
 
-## Key View Directories (`resources/views/`)
-*   `resources/views/layouts/`: Base HTML structures.
-    *   `admin.blade.php`: Admin dashboard shell (sidebar, nav).
-    *   `site.blade.php`: Public website shell.
-*   `resources/views/livewire/`: **V** (View) - Component templates.
-    *   `admin/order/create.blade.php`: The "Input Pesanan" form.
-    *   `track-order.blade.php`: The tracking page UI.
+### 1. Kalau mau ubah Tampilan (HTML/Warna)
+Buka folder: `resources/views/livewire/`
+*   `admin/order/create.blade.php`: Tampilan form input pesanan.
+*   `track-order.blade.php`: Tampilan halaman tracking pelanggan.
+*   `layouts/admin.blade.php`: Tampilan kerangka admin (menu samping).
 
-## Flow Example
-1.  **URL**: `/admin/orders`
-2.  **Route**: Defined in `routes/web.php`.
-3.  **Component**: `app/Livewire/Admin/Order/Index.php`.
-4.  **View**: `resources/views/livewire/admin/order/index.blade.php`.
+### 2. Kalau mau ubah Logika (Cara kerja)
+Buka folder: `app/Livewire/`
+*   `Admin/Order/Create.php`: Logika saat mau simpan pesanan baru.
+*   `TrackOrder.php`: Logika saat pelanggan cek resi (termasuk generate QRIS otomatis).
+
+### 3. Kalau mau ubah Database (Tabel)
+Buka folder: `app/Models/` atau `database/migrations/`
+*   Di sini tempat mengatur kolom-kolom tabel seperti `Order` atau `Customer`.
+
+## Contoh Kasus
+**"Saya mau ganti warna tombol 'Simpan' jadi Merah."**
+> Cari filenya di `resources/views/...`. Ubah kode `bg-primary` jadi `bg-red-500`.
+
+**"Saya mau pesanan otomatis lunas kalau beratnya 0 kg."**
+> Cari filenya di `app/Livewire/...`. Tambahkan logika `if ($berat == 0) ...` di situ.

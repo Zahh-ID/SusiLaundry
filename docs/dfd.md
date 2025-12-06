@@ -1,66 +1,70 @@
-# Data Flow Diagram (DFD) - Level 0 (Context)
+# Diagram Alur Data (DFD)
+
+Diagram ini menjelaskan bagaimana **Data** mengalir keluar masuk sistem Susi Laundry.
+
+## Level 0 (Gambaran Besar)
 
 ```mermaid
 graph LR
-    Customer((Customer))
+    Customer((Pelanggan))
     Admin((Admin))
     System[Susi Laundry System]
-    PaymentGateway((Payment Gateway\nMidtrans))
-    Printer((Thermal Printer))
+    PaymentGateway((Midtrans\nGateway Pembayaran))
+    Printer((Printer Thermal))
 
     %% Customer Interactions
-    Customer -- "Request Order" --> Admin
-    Customer -- "Track Code" --> System
-    System -- "Order Status / QRIS" --> Customer
+    Customer -- "Minta Order Laundry" --> Admin
+    Customer -- "Cek Kode Resi" --> System
+    System -- "Status / Gambar QRIS" --> Customer
     
     %% Admin Interactions
-    Admin -- "Input Order Data" --> System
-    Admin -- "Update Status" --> System
-    System -- "Sales Reports" --> Admin
+    Admin -- "Input Data Order" --> System
+    Admin -- "Update Status Cucian" --> System
+    System -- "Laporan Keuangan" --> Admin
     
     %% Gateway Interactions
-    System -- "Generate Payment (QRIS)" --> PaymentGateway
-    PaymentGateway -- "Payment Notification (Webhook)" --> System
+    System -- "Request Kode QR" --> PaymentGateway
+    PaymentGateway -- "Notifikasi Pembayaran Sukses" --> System
     
     %% Output
-    System -- "Print Invoice" --> Printer
+    System -- "Cetak Nota" --> Printer
 ```
 
-# DFD Level 1 (Order Processing)
+## Level 1 (Rincian Proses)
 
 ```mermaid
 graph TD
     %% Entities
     Admin((Admin))
-    Customer((Customer))
+    Customer((Pelanggan))
     
     %% Processes
-    P1(1.0 Create Order)
-    P2(2.0 Process Payment)
+    P1(1.0 Buat Pesanan)
+    P2(2.0 Proses Bayar)
     P3(3.0 Update Status)
-    P4(4.0 Generate Report)
+    P4(4.0 Laporan)
     
     %% Data Stores
-    DB_Orders[(Orders DB)]
-    DB_Customers[(Customers DB)]
-    DB_Payments[(Payments DB)]
+    DB_Orders[(Database Order)]
+    DB_Customers[(Database Pelanggan)]
+    DB_Payments[(Database Pembayaran)]
     
     %% Flows
-    Admin -->|Order Details| P1
-    P1 -->|Save Data| DB_Orders
-    P1 -->|Save Profile| DB_Customers
-    P1 -->|Generate ID| Customer
+    Admin -->|Data Cucian| P1
+    P1 -->|Simpan| DB_Orders
+    P1 -->|Simpan Profil| DB_Customers
+    P1 -->|Kasi Kode Resi| Customer
     
     Customer -->|Scan QRIS| P2
-    P2 -->|Update Status| DB_Payments
-    DB_Payments -->|Confirm Payment| DB_Orders
+    P2 -->|Update Lunas| DB_Payments
+    DB_Payments -->|Konfirmasi Lunas| DB_Orders
     
-    Admin -->|Check Process| P3
-    P3 -->|Read Status| DB_Orders
-    P3 -->|Write Status| DB_Orders
+    Admin -->|Cek Cucian| P3
+    P3 -->|Baca Status| DB_Orders
+    P3 -->|Ubah Status| DB_Orders
     
-    Admin -->|Request Stats| P4
-    P4 -->|Fetch Data| DB_Orders
-    P4 -->|Fetch Data| DB_Payments
-    P4 -->|Show Dashboard| Admin
+    Admin -->|Minta Laporan| P4
+    P4 -->|Ambil Data| DB_Orders
+    P4 -->|Ambil Data| DB_Payments
+    P4 -->|Tampilkan Grafik| Admin
 ```

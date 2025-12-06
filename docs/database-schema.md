@@ -1,84 +1,89 @@
-# Database Schema
+# Skema Database (Struktur Data)
 
-This document details the database structure for Susi Laundry.
+Dokumen ini menjelaskan tabel-tabel yang ada di database. Bayangkan ini sebagai daftar "Buku Catatan" yang dimiliki laundry.
 
-## Tables
+## Diagram Hubungan Antar Tabel (ERD)
+Gambar di bawah menjelaskan bagaimana satu data berhubungan dengan data lain.
 
-### 1. Users
-Stores admin users.
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : "mengelola"
+    CUSTOMERS ||--o{ ORDERS : "memesan"
+    PACKAGES ||--o{ ORDERS : "berisi"
+    ORDERS ||--o{ PAYMENTS : "memiliki"
+    USERS ||--o{ ACTIVITY_LOGS : "mencatat"
 
-| Column | Type | Notes |
-| :--- | :--- | :--- |
-| `id` | BigIncrements | Primary Key |
-| `name` | String | |
-| `email` | String | Unique |
-| `password` | String | Hashed |
-| `created_at` | Timestamp | |
-| `updated_at` | Timestamp | |
+    USERS {
+        bigint id PK
+        string name "Nama Admin"
+        string email "Login Admin"
+        string password
+    }
 
-### 2. Packages
-Laundry service packages available for selection.
+    CUSTOMERS {
+        bigint id PK "ID Pelanggan"
+        string name "Nama"
+        string phone "No HP"
+        string email
+        text address "Alamat"
+    }
 
-| Column | Type | Notes |
-| :--- | :--- | :--- |
-| `id` | BigIncrements | Primary Key |
-| `package_name` | String | e.g. "Cuci Setrika Express" |
-| `price_per_kg` | Decimal | |
-| `turnaround_hours` | Integer | Est. time in hours |
-| `billing_type` | Enum | `kg`, `item` |
-| `description` | Text | |
+    PACKAGES {
+        bigint id PK
+        string package_name "Nama Paket (Cuci Komplit)"
+        decimal price_per_kg "Harga/kg"
+        int turnaround_hours "Estimasi Jam Selesai"
+        string billing_type "Hitungan (kg/satuan)"
+    }
 
-### 3. Customers
-Customer profiles (auto-saved from orders).
+    ORDERS {
+        bigint id PK
+        string order_code "Kode Unik 10-huruf"
+        foreignId customer_id FK "Milik Siapa"
+        foreignId package_id FK "Paket Apa"
+        foreignId admin_id FK "Siapa yang input"
+        string status "Proses sekarang"
+        string payment_status "Lunas/Belum"
+        string payment_method "Tunai/QRIS"
+        decimal total_price "Total Rupiah"
+        decimal actual_weight "Berat Asli"
+    }
 
-| Column | Type | Notes |
-| :--- | :--- | :--- |
-| `id` | BigIncrements | Primary Key |
-| `name` | String | |
-| `phone` | String | |
-| `email` | String | |
-| `address` | Text | |
+    PAYMENTS {
+        bigint id PK
+        foreignId order_id FK "Bayar untuk order mana"
+        string method "Metode"
+        string status "Sukses/Gagal/Pending"
+        decimal amount "Jumlah Bayar"
+        string qris_image_url "Link Gambar QR"
+        timestamp expiry_time "Kapan QR kadaluarsa"
+    }
+```
 
-### 4. Orders
-The core transactional table.
+---
 
-| Column | Type | Notes |
-| :--- | :--- | :--- |
-| `id` | BigIncrements | Primary Key |
-| `order_code` | String | Unique, 10-char tracking code |
-| `customer_id` | FK | -> customers.id |
-| `package_id` | FK | -> packages.id |
-| `admin_id` | FK | -> users.id (Creator) |
-| `status` | String | `pending_confirmation`, `processing`, `ready_for_pickup`, `taken`, `completed`, `cancelled` |
-| `payment_status` | String | `pending`, `paid`, `unpaid` |
-| `payment_method` | String | `cash`, `qris` |
-| `service_type` | String | e.g. `reguler`, `express` |
-| `estimated_weight` | Decimal | Initial weight input |
-| `actual_weight` | Decimal | Final confirmed weight |
-| `price_per_kg` | Decimal | Checkpoint price at time of order |
-| `delivery_fee` | Decimal | |
-| `total_price` | Decimal | `(weight * price) + fees` |
-| `pickup_or_delivery` | String | `none`, `pickup`, `delivery` |
-| `activity_log` | JSON | History of status changes/actions |
+## Penjelasan Tabel
 
-### 5. Payments
-Tracks individual payment attempts (especially QRIS transactions).
+### 1. Users (Admin)
+Daftar orang yang bisa login ke halaman admin.
+*   `email`: Digunakan untuk login.
+*   `password`: Kata sandi (rahasia).
 
-| Column | Type | Notes |
-| :--- | :--- | :--- |
-| `id` | BigIncrements | Primary Key |
-| `order_id` | FK | -> orders.id |
-| `method` | String | `cash`, `qris` |
-| `status` | String | `pending`, `paid`, `expired`, `failed` |
-| `amount` | Decimal | |
-| `qris_url` | String | Deep link for payment apps |
-| `qris_image_url` | String | QR Code image source |
-| `expiry_time` | Timestamp | |
-| `midtrans_transaction_id`| String | External Gateway ID |
+### 2. Packages (Daftar Menu)
+Daftar layanan yang dijual. Contoh: "Cuci Kering", "Setrika Saja".
+*   `price_per_kg`: Harga dasar.
+*   `turnaround_hours`: Berapa lama cucian biasanya selesai (contoh: 48 jam).
 
-## Relationships
-- **Order** belongs to **User** (Admin)
-- **Order** belongs to **Customer**
-- **Order** belongs to **Package**
-- **Order** has many **Payments**
-- **Customer** has many **Orders**
+### 3. Customers (Pelanggan)
+Buku telepon pelanggan. Ini tersimpan otomatis saat membuat pesanan baru.
+
+### 4. Orders (Pesanan)
+Tabel paling penting. Mencatat setiap transaksi laundry.
+*   `order_code`: Kode acak (misal: `TRX998877`) yang dikasih ke pelanggan untuk cek resi.
+*   `status`: Posisi cucian sekarang (Pending -> Proses -> Selesai).
+*   `payment_status`: Status uang (Paid = Lunas, Unpaid = Belum).
+
+### 5. Payments (Riwayat Pembayaran)
+Mencatat setiap kali ada percobaan pembayaran.
+*   Kenapa dipisah dari Order? Karena satu order bisa punya banyak percobaan bayar (misal: kemarin QRIS gagal, hari ini coba lagi QRIS baru).
+*   Menyimpan link gambar QRIS dan waktu kadaluarsanya.
