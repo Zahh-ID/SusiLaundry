@@ -27,11 +27,11 @@ class Edit extends Component
     public function update()
     {
         $this->validate([
-            'package_name' => 'required|string',
-            'description' => 'required|string',
-            'price_per_kg' => 'required|numeric',
-            'billing_type' => 'required|string',
-            'turnaround_hours' => 'required|integer|min:1',
+            'package_name' => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'price_per_kg' => ['required', 'numeric', 'min:0', 'max:999999.99', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'billing_type' => 'required|string|in:per_kg,per_item',
+            'turnaround_hours' => 'required|integer|min:1|max:720',
         ]);
 
         $this->package->update([

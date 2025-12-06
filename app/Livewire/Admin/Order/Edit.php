@@ -26,6 +26,7 @@ class Edit extends Component
     public array $paymentStatuses = [];
     public array $pickupOptions = [];
     public $latestPayment;
+    public $showUnpaidModal = false;
 
     public function mount(Order $order): void
     {
@@ -63,15 +64,27 @@ class Edit extends Component
     {
         $this->validate([
             'status' => 'required|string',
-            'actual_weight' => 'nullable|numeric|min:0',
-            'price_per_kg' => 'nullable|numeric|min:0',
-            'total_price' => 'nullable|numeric|min:0',
+            'actual_weight' => ['nullable', 'numeric', 'min:0', 'max:999999.99', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'price_per_kg' => ['nullable', 'numeric', 'min:0', 'max:99999999.99', 'regex:/^\d+(\.\d{1,2})?$/'],
+            'total_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99', 'regex:/^\d+(\.\d{1,2})?$/'],
             'payment_method' => 'required|in:cash,qris',
             'payment_status' => 'required|string',
             'pickup_or_delivery' => 'required|in:none,pickup,delivery',
-            'delivery_fee' => 'nullable|numeric|min:0',
+            'delivery_fee' => ['nullable', 'numeric', 'min:0', 'max:99999999.99', 'regex:/^\d+(\.\d{1,2})?$/'],
             'estimated_completion' => 'nullable|date',
         ]);
+
+        \Illuminate\Support\Facades\Log::info('Update Attempt', [
+            'status' => $this->status,
+            'payment_status' => $this->payment_status,
+            'is_taken' => $this->status === 'taken',
+            'is_not_paid' => $this->payment_status !== 'paid',
+        ]);
+
+        if ($this->status === 'taken' && $this->payment_status !== 'paid') {
+            $this->showUnpaidModal = true;
+            return;
+        }
 
         $total = $this->total_price;
         if (!$total && $this->actual_weight && $this->price_per_kg) {

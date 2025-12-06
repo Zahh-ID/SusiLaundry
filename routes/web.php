@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified', 'prevent-back-history'])->group(function 
         Route::get('/customers', AdminCustomerIndex::class)->name('customers.index');
         Route::get('/reports', AdminReportIndex::class)->name('reports.index');
         Route::get('/reports/orders/export', OrderExportController::class)->name('reports.orders.export');
+        Route::get('/secret-webhook-simulator', \App\Livewire\Admin\WebhookSimulator::class)->name('webhook.simulator');
     });
 });
 

@@ -49,15 +49,21 @@ class CreateOrder extends Component
         if ($step === 1) {
             $this->validate([
                 'package_id' => 'required|exists:packages,id',
-                'estimated_weight' => 'required|numeric|min:1',
+                'estimated_weight' => [
+                    'required',
+                    'numeric',
+                    'min:1',
+                    'max:999999.99',
+                    'regex:/^\d+(\.\d{1,2})?$/'
+                ],
             ]);
         } elseif ($step === 2) {
             $this->validate([
-                'name' => 'required|string|min:3',
-                'email' => 'required|email',
-                'address' => 'required|string|min:10',
+                'name' => 'required|string|min:3|max:255',
+                'email' => 'required|email|max:255',
+                'address' => 'required|string|min:10|max:500',
                 'pickup_or_delivery' => 'required|in:none,pickup,delivery',
-                'notes' => 'nullable|string',
+                'notes' => 'nullable|string|max:1000',
             ]);
         }
     }
