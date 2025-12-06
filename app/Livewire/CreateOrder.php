@@ -105,6 +105,7 @@ class CreateOrder extends Component
             'estimated_completion' => $estimatedCompletion,
             'pickup_or_delivery' => $this->pickup_or_delivery,
             'delivery_fee' => $this->resolveDeliveryFee($this->pickup_or_delivery),
+            'total_price' => $this->totalPrice,
             'activity_log' => [],
         ]);
 
