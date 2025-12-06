@@ -1,45 +1,43 @@
-# MVC Architecture in Susi Laundry
+# Arsitektur Aplikasi (MVC)
 
-The application is built using **Laravel** (MVC Framework) and **Livewire** (Interactive Components).
+Aplikasi Susi Laundry dibangun menggunakan pola **MVC (Model-View-Controller)**. Agar mudah, ayo bayangkan sebuah **Restoran**.
 
-## 1. Model (M)
-Represents the data structure and business logic.
-- Located in `app/Models/`.
-- Examples: `Order.php`, `Package.php`, `Customer.php`.
-- **Role**: Interacts with the database, defines relationships (e.g., `Order::payments()`), and contains domain logic (e.g., `Order::nextStatus()`).
+## 1. Model (M) → Koki & Bahan Makanan
+Model adalah bagian yang mengurus **Data**. Dia yang tahu segala aturan tentang data.
+*   **Lokasi**: `app/Models/`
+*   **Contoh**: `Order.php` (Pesanan), `Package.php` (Menu Paket).
+*   **Tugas**:
+    *   Berbicara dengan Database (Gudang Bahan).
+    *   Contoh Logika: "Satu pesanan punya banyak riwayat pembayaran."
 
-## 2. View (V)
-Represents the user interface.
-- Located in `resources/views/`.
-- **Blade Templates**: `layouts/admin.blade.php`, `landing.blade.php`.
-- **Livewire Views**: `resources/views/livewire/admin/order/create.blade.php`.
-- **Role**: Displays data to the user using HTML/TailwindCSS. Livewire views are dynamic and update without full page reloads.
+## 2. View (V) → Piring & Tampilan Makanan
+View adalah apa yang **dilihat oleh pengguna** di layar.
+*   **Lokasi**: `resources/views/`
+*   **Contoh**: Halaman Dashboard, Halaman Tracking.
+*   **Tugas**:
+    *   Menata tulisan, warna, dan tombol agar cantik.
+    *   Tidak boleh mikir berat-berat, cuma menampilkan apa yang dikasih.
 
-## 3. Controller (C)
-Handles incoming requests and returns responses.
-- **Traditional Controllers**: `OrderPrintController` (handles PDF generation).
-- **Livewire Components (Modern "C")**:
-    - Located in `app/Livewire/`.
-    - Examples: `Admin\Order\Index.php`, `TrackOrder.php`.
-    - **Role**:
-        - Acts as a Controller/ViewModel hybrid.
-        - Handles state (public properties like `$order_code`).
-        - Handles events/actions (`save()`, `refreshStatus()`).
-        - Binds data directly to the View.
+## 3. Controller (C) → Pelayan (Waiter)
+Controller adalah perantara. Dia menerima pesanan pelanggan, menyuruh Koki masak, lalu mengantar makanan ke meja.
+*   **Lokasi**: `app/Livewire/`
+*   **Contoh**: `TrackOrder.php`, `Create.php`.
+*   **Tugas**:
+    *   Menerima input (Misal: User klik tombol "Simpan").
+    *   Memanggil Model: "Eh Model, simpan data ini ke database ya!"
+    *   Memilih View: "Oke data sudah simpan, sekarang tampilkan halaman 'Sukses' ke user."
 
 ---
 
-## Request Lifecycle (Example: Tracking Page)
+## Contoh Alur: Halaman Tracking
 
-1.  **Request**: User visits `/tracking?code=ABC12345`.
-2.  **Route**: `routes/web.php` maps `/tracking` to `TrackOrder` class.
-3.  **Component (Controller)**: `TrackOrder::mount()` reads the `code` query parameter.
-4.  **Model**: `TrackOrder` calls `Order::where(...)` to fetch data from DB.
-5.  **View**: `TrackOrder` renders `track-order.blade.php` with the fetched Order data.
-6.  **Response**: Browser receives HTML and renders the page.
-7.  **Interaction**:
-    - User waits.
-    - `wire:poll` triggers `refreshStatus()` action.
-    - Component logic checks `expiry_time`.
-    - If expired, Component uses Model (Payment) to create new row.
-    - View updates seamlessly via AJAX.
+1.  **Kamu Datang** (Request): Membuka `/tracking`.
+2.  **Pelayan Menyambut** (Controller - `TrackOrder.php`):
+    *   Dia nanya: "Mana kode resinya?"
+3.  **Koki Mengecek** (Model - `Order.php`):
+    *   Dia ngecek ke Gudang (Database).
+    *   "Ini datanya ketemu! Statusnya Pembayaran Pending."
+4.  **Penyajian** (View - `track-order.blade.php`):
+    *   Data tadi ditaruh di piring cantik (Halaman Web).
+    *   Kalau status pending, otomatis tampilin gambar QRIS.
+5.  **Dihidangkan** (Response): Kamu melihat halaman tracking di HP.

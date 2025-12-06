@@ -1,49 +1,50 @@
-# Features of Susi Laundry Management System
+# Fitur Sistem Manajemen Susi Laundry
 
-This document outlines the core features and functionalities of the Susi Laundry web application.
+Dokumen ini menjelaskan kemampuan utama aplikasi Susi Laundry dengan bahasa yang mudah dipahami.
 
-## 1. Landing Page (Public)
-*   **Dynamic Package Display**: Shows available laundry packages (fetched from database).
-*   **Order Tracking**: Public tracking form to check order status without login.
-*   **Testimonials & Marketing**: Sections for user engagement (FAQ, features, etc.).
+## 1. Halaman Depan (Website Publik)
+*   **Daftar Paket Laundry**: Menampilkan pilihan paket cuci yang tersedia (diambil langsung dari database).
+*   **Cek Resi / Tracking**: Formulir untuk mengecek status laundry tanpa perlu login. Cukup masukkan kode order.
+*   **Informasi & Testimoni**: Bagian untuk menampilkan tanya jawab (FAQ) dan keunggulan laundry.
 
-## 2. Order Management (Admin)
-*   **Input Pesanan Offline (Walk-in)**:
-    *   Wizard-based creation form (Service -> Details -> Confirmation).
-    *   Supports immediate Cash payment confirmation.
-    *   Supports QRIS generation for cashless payment.
-*   **Order List**:
-    *   Pagination and filtering by status, service type, and date.
-    *   Search by Order Code or Customer Name.
-*   **Order Workflow State Machine**:
-    *   Strict status progression: `Pending Confirmation` -> `Processing` -> `Ready for Pickup` -> `Taken` -> `Completed`.
-    *   **Payment Gates**: Prevents moving to `Taken` if order is unpaid.
-    *   **QRIS Management**: Auto-generates QRIS for `Processing` orders; supports regeneration if expired.
+## 2. Manajemen Pesanan (Khusus Admin)
+*   **Input Pesanan Walk-in (Offline)**:
+    *   Formulir bertahap yang mudah: Pilih Layanan -> Isi Data Pelanggan -> Konfirmasi.
+    *   **Konfirmasi Pembayaran Langsung**: Bisa langsung ditandai "Lunas" jika pelanggan bayar tunai di tempat.
+    *   **Pilihan QRIS**: Bisa membuat kode QRIS otomatis jika pelanggan ingin bayar non-tunai.
+*   **Daftar Pesanan**:
+    *   Bisa cari pesanan berdasarkan Nama atau Kode.
+    *   Filter pesanan: Mana yang "Belum Lunas", "Siap Diambil", atau "Selesai".
+*   **Alur Kerja Otomatis**:
+    *   Status pesanan dikunci langkah-demi-langkah: `Menunggu Konfirmasi` -> `Diproses` -> `Siap Diambil` -> `Diambil` -> `Selesai`.
+    *   **Kunci Pengambilan**: Barang **TIDAK BISA** diambil jika statusnya belum "Lunas". Sistem akan menolak otomatis.
 
-## 3. Customer Tracking (Public)
-*   **Real-time Status**: Users track orders via a unique 10-digit Order Code.
-*   **Payment Integration**:
-    *   Displays active QRIS code for unpaid orders.
-    *   **Auto-Regeneration**: Automatically generates a new QR code if the previous one expired while viewing.
-    *   Shows explicit "Paid" or "Pending" status.
-*   **Timeline**: Visual progress bar of the laundry process.
+## 3. Pelacakan Pelanggan (Tracking)
+*   **Status Real-time**: Pelanggan memantau cucian mereka menggunakan Kode Unik (10 digit).
+*   **Sistem Pembayaran**:
+    *   Jika belum bayar, akan muncul kode QRIS yang bisa discan.
+    *   **QRIS Selalu Baru**: Jika kode QRIS kadaluarsa saat halaman dibuka, sistem otomatis membuatkan yang baru.
+    *   Tanda "Lunas" akan muncul otomatis setelah pembayaran sukses.
+*   **Garis Waktu (Timeline)**: Tampilan visual perjalanan cucian (Diterima -> Dicuci -> Selesai).
 
-## 4. Admin Dashboard
-*   **Metrics**: Revenue, Active Orders, Completed Orders overview.
-*   **Charts**: Visual representation of sales trends.
+## 4. Dashboard Admin
+*   **Ringkasan**: Melihat total pendapatan, jumlah cucian aktif, dan cucian selesai dalam satu layar.
+*   **Grafik**: Melihat tren penjualan harian/bulanan.
 
-## 5. System Features
-*   **Authentication**: Secure Admin login/logout.
-*   **Email Notifications**:
-    *   Order Created (with Tracking Code).
-    *   Status Updates (e.g., "Ready for Pickup").
-    *   Payment Confirmation Receipts.
-*   **PDF Printing**: Generate thermal-printer friendly receipts/invoices.
-*   **Export/Reports**: (Planned/Partial) Export order data for accounting.
+## 5. Fitur Lainnya
+*   **Keamanan**: Halaman admin butuh login email & password.
+*   **Notifikasi Email**:
+    *   Email masuk saat pesanan dibuat (berisi Kode Tracking).
+    *   Email update saat cucian selesai.
+    *   Email bukti pembayaran (Notanya).
+*   **Cetak Nota**: Bisa print nota kecil (thermal) untuk ditempel di bungkusan.
+*   **Kelola Paket & Pelanggan**:
+    *   Tambah/Hapus jenis paket laundry.
+    *   Lihat data pelanggan yang pernah mencuci.
+*   **Laporan**: Download data penjualan ke Excel untuk pembukuan.
 
-## 6. Payment System
-*   **Cash**: Manual confirmation by Admin.
-*   **QRIS (Midtrans/Gateway)**:
-    *   Dynamic generation based on order amount.
-    *   Expiration handling (auto-expire old, regen new).
-    *   Webhook integration (simulation available).
+## 6. Sistem Pembayaran
+*   **Tunai (Cash)**: Admin klik tombol konfirmasi manual.
+*   **QRIS (Otomatis)**:
+    *   Menggunakan Midtrans.
+    *   Jika pelanggan bayar lewat HP, status di sistem otomatis berubah jadi "Lunas".

@@ -1,36 +1,36 @@
-# How The Web Works (Context: Susi Laundry)
+# Cara Kerja Website (Konteks: Susi Laundry)
 
-This is a simplified explanation of how this web application operates for a beginner.
+Penjelasan sederhana tentang bagaimana aplikasi ini bekerja, ibarat memesan makanan di restoran.
 
-## 1. Client-Server Model
-*   **Client (You/Browser)**: The device (Phone/Laptop) accessing the website. It sends **Requests**.
-*   **Server (Susi Laundry App)**: The computer running the PHP/Laravel code and hosting the Database. It sends **Responses**.
+## 1. Konsep Dasar: Klien & Server
+*   **Klien (HP/Laptop Kamu)**: Ini adalah alat yang kamu gunakan untuk membuka website. Tugasnya adalah **Meminta (Request)**.
+*   **Server (Komputer Laundry)**: Ini adalah komputer pusat yang menyimpan semua data Susi Laundry. Tugasnya adalah **Melayani (Response)**.
 
-## 2. The Journey of a Request
-When you click "Cek Status" on the tracking page:
+## 2. Perjalanan Satu Klik "Cek Status"
+Bayangkan saat pelanggan mengecek status laundry di HP:
 
-1.  **DNS Lookup**: The browser asks "Where is susilaundry.com?" and gets an IP address.
-2.  **HTTP Request**: The browser sends a message to that IP:
-    > "GET /tracking?code=XYZ"
-3.  **Server Processing (Laravel)**:
-    *   The server receives the message.
-    *   It looks at the URL (`/tracking`).
-    *   It wakes up the `TrackOrder` code.
-    *   The code asks the **Database**: "Do we have an order with code XYZ?"
-    *   The Database replies: "Yes, status is 'Processing'."
-4.  **HTML Generation**: The server constructs a webpage (HTML) combining the template + the data ("Processing").
-5.  **HTTP Response**: The server sends the HTML back to the browser.
-6.  **Rendering**: Your browser reads the HTML and draws the text, colors, and buttons you see.
+1.  **Mencari Alamat**: Saat mengetik `susilaundry.com`, HP bertanya ke internet "Dimana rumah Susi Laundry?" (Ini namanya DNS).
+2.  **Mengirim Pesan (Request)**: HP mengirim pesan ke Server Susi Laundry:
+    > "Tolong tampilkan status untuk kode pesanan XYZ dong."
+3.  **Server Bekerja (Di Dapur)**:
+    *   Server menerima pesan.
+    *   Server membuka **Database** (Buku Catatan Besar).
+    *   Server mencari: "Ada nggak kode XYZ?"
+    *   Database menjawab: "Ada! Punya Budi, statusnya sedang dicuci."
+4.  **Menyiapkan Jawaban**: Server menyusun tampilan halaman yang rapi berisi tulisan "Sedang Dicuci".
+5.  **Mengirim Balasan (Response)**: Server mengirim halaman itu balik ke HP.
+6.  **Tampil di Layar**: HP kamu menerima halaman itu dan menampilkannya.
 
-## 3. Dynamic Updates (Livewire / AJAX)
-Modern web apps like this one don't reload the whole page for every little change (like checking if payment is done).
+## 3. Update Tanpa Loading (Livewire)
+Aplikasi Susi Laundry itu canggih. Kalau kamu perhatikan, saat mengecek status pembayaran, halaman tidak berkedip (reload) tapi statusnya bisa berubah sendiri.
 
-*   **AJAX**: The browser sends a "secret" background message to the server: "Any updates?"
-*   **Server**: "Yes, payment received!"
-*   **DOM Diffing**: The browser only changes the specific part of the screen (`Unpaid` -> `Paid`) without blinking or refreshing the whole page.
+*   Ini karena HP & Server **berbisik-bisik** di belakang layar (Teknik ini namanya AJAX/Livewire).
+*   HP bertanya terus setiap 15 detik: "Udah bayar belum pak? Udah bayar belum?"
+*   Saat sudah bayar, Server berbisik: "Sudah!".
+*   HP langsung ganti tulisan "Belum Lunas" jadi "Lunas" tanpa memuat ulang seluruh halaman.
 
-## 4. Database
-Think of the database as a giant Excel sheet managed by the Server.
-*   **Table `orders`**: Rows of orders.
-*   **Table `customers`**: Rows of people.
-*   We use **SQL** (Structured Query Language) to talk to it: `SELECT * FROM orders WHERE code = 'XYZ'`.
+## 4. Database (Buku Catatan)
+Database adalah tempat penyimpanan semua data. Bayangkan file Excel raksasa yang sangat rapi.
+*   Tabel **Orders**: Daftar pesanan (Siapa, Paket apa, Berapa kg).
+*   Tabel **Customers**: Daftar nomor HP dan alamat pelanggan.
+*   Kita menggunakan bahasa **SQL** untuk bicara dengan database.

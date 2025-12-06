@@ -5,17 +5,17 @@ flowchart TD
     Start([Customer Arrives]) --> Type{Order Type?}
     
     %% Walk-in Flow
-    Type -- Walk-in --> AdminInput[Admin Inputs Order\n(Wizard Form)]
+    Type -- Walk-in --> AdminInput["Admin Inputs Order<br>(Wizard Form)"]
     AdminInput --> PkgSelect[Select Package]
     PkgSelect --> Details[Input Customer Details]
-    Details --> Weight[Input/Est Weight]
+    Details --> Weight["Input/Est Weight"]
     
     Weight --> PayMethod{Payment?}
     
     %% Cash Payment
     PayMethod -- Cash --> CashConfirm{Paid Now?}
-    CashConfirm -- Yes --> MarkPaid[Status: Paid]
-    CashConfirm -- No --> MarkUnpaid[Status: Unpaid]
+    CashConfirm -- Yes --> MarkPaid["Status: Paid"]
+    CashConfirm -- No --> MarkUnpaid["Status: Unpaid"]
     
     %% QRIS Payment
     PayMethod -- QRIS --> GenQR[Generate QRIS Code]
@@ -25,11 +25,11 @@ flowchart TD
     MarkUnpaid --> SaveOrder
     ShowQR --> SaveOrder
     
-    SaveOrder --> Process[Status: Processing]
+    SaveOrder --> Process["Status: Processing"]
     
     %% Processing Loop & Payment Check
     Process --> WashDry[Laundering...]
-    WashDry --> Ready[Status: Ready for Pickup]
+    WashDry --> Ready["Status: Ready for Pickup"]
     
     Ready --> Pickup{Customer Pickup}
     
@@ -39,7 +39,7 @@ flowchart TD
     PayNow --> CheckPay
     
     CheckPay -- Yes --> Handover[Handover Items]
-    Handover --> Taken[Status: Taken\n(Final)]
+    Handover --> Taken["Status: Taken<br>(Final)"]
     Taken --> End([Completed])
 ```
 
