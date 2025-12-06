@@ -99,7 +99,7 @@
                             @forelse ($recentOrders as $order)
                                                         <tr>
                                                             <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-indigo-600">
-                                                                <a href="{{ route('admin.orders.edit', $order) }}"
+                                                                <a href="{{ route('admin.orders.index') }}"
                                                                     class="hover:underline">{{ $order->order_code }}</a>
                                                             </td>
                                                             <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-900">
@@ -108,7 +108,7 @@
                                                             </td>
                                                             <td class="whitespace-nowrap px-6 py-4 text-sm">
                                                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                                                        {{ match ($order->status) {
+                                                                                                    {{ match ($order->status) {
                                     'completed' => 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20',
                                     'processing', 'washing' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10',
                                     'pending' => 'bg-yellow-50 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',
@@ -149,7 +149,8 @@
                                     </p>
                                     <p class="mt-1 truncate text-xs leading-5 text-slate-500">Rp
                                         {{ number_format($package->price_per_kg, 0, ',', '.') }} /
-                                        {{ $package->billing_type == 'per_kg' ? 'kg' : 'item' }}</p>
+                                        {{ $package->billing_type == 'per_kg' ? 'kg' : 'item' }}
+                                    </p>
                                 </div>
                                 <div class="flex flex-none items-center gap-x-4">
                                     <a href="{{ route('admin.packages.edit', $package) }}"

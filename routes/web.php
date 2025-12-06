@@ -47,7 +47,6 @@ Route::middleware(['auth', 'verified', 'prevent-back-history'])->group(function 
         Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
         Route::get('/orders', AdminOrderIndex::class)->name('orders.index');
         Route::get('/orders/create', AdminOrderCreate::class)->name('orders.create');
-        Route::get('/orders/{order}/edit', AdminOrderEdit::class)->name('orders.edit');
         Route::get('/orders/{order}/print', OrderPrintController::class)->name('orders.print');
         Route::get('/packages', AdminPackageIndex::class)->name('packages.index');
         Route::get('/packages/create', AdminPackageCreate::class)->name('packages.create');

@@ -17,62 +17,115 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    public $step = 1;
+
+    // Step 1: Layanan
+    public $package_id;
+    public $actual_weight; // Changed from estimated_weight
+
+    // Step 2: Detail
     public $name;
     public $email;
     public $address;
-    public $package_id;
-    public $estimated_weight;
-    public $service_type = 'regular';
-    public $notes;
-    public $payment_method = 'cash';
     public $pickup_or_delivery = 'none';
+    public $notes;
+
+    // Step 3: Review & Payment
+    public $payment_method = 'cash';
     public $delivery_fee;
+    public bool $markAsPaid = false; // Add this property
+
     public $successCode;
-    public array $paymentMethods = [];
-    public array $pickupOptions = [];
-    public $initialStatusLabel;
     public bool $showQrisModal = false;
     public array $pendingOrderPayload = [];
     public array $pendingQrisPayload = [];
     public ?int $pendingPaymentId = null;
     public bool $embedded = false;
 
-    protected function rules(): array
-    {
-        return [
-            'name' => 'required|string',
-            'email' => 'required|email',
-            'address' => 'required|string',
-            'package_id' => 'required|exists:packages,id',
-            'estimated_weight' => 'required|numeric|min:1',
-            'service_type' => 'required|string',
-            'payment_method' => 'required|in:cash,qris',
-            'pickup_or_delivery' => 'required|in:none,pickup,delivery',
-            'delivery_fee' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
-        ];
-    }
-
     public function mount(): void
     {
-        $this->paymentMethods = config('orders.payment_methods');
-        $this->pickupOptions = config('orders.pickup_options');
-        $statuses = config('orders.order_statuses', []);
-        $initialKey = Order::initialStatus();
-        $this->initialStatusLabel = $statuses[$initialKey] ?? 'Menunggu Konfirmasi';
+        // No special mount logic needed for now
+    }
+
+    public function nextStep()
+    {
+        $this->validateStep($this->step);
+        $this->step++;
+    }
+
+    public function prevStep()
+    {
+        $this->step--;
+    }
+
+    public function setPackage($id)
+    {
+        $this->package_id = $id;
+    }
+
+    protected function validateStep($step)
+    {
+        if ($step === 1) {
+            $this->validate([
+                'package_id' => 'required|exists:packages,id',
+                'actual_weight' => [
+                    'required',
+                    'numeric',
+                    'min:0.1',
+                    'max:999999.99',
+                    'regex:/^\d+(\.\d{1,2})?$/'
+                ],
+            ]);
+        } elseif ($step === 2) {
+            $this->validate([
+                'name' => 'required|string|min:3|max:255',
+                'email' => 'nullable|email|max:255', // Email optional for offline
+                'address' => 'required|string|min:5|max:500',
+                'pickup_or_delivery' => 'required|in:none,pickup,delivery',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+        }
     }
 
     public function save(): void
     {
-        $data = $this->validate();
-        $data['status'] = Order::initialStatus();
+        $this->validate([
+            'payment_method' => 'required|in:cash,qris',
+        ]);
 
-        if ($data['payment_method'] === 'qris') {
+        $data = [
+            'package_id' => $this->package_id,
+            'actual_weight' => $this->actual_weight,
+            'name' => $this->name,
+            'email' => $this->email,
+            'address' => $this->address,
+            'pickup_or_delivery' => $this->pickup_or_delivery,
+            'notes' => $this->notes,
+            'payment_method' => $this->payment_method,
+            'status' => Order::initialStatus(),
+        ];
+
+        if ($this->payment_method === 'qris') {
             $this->createOrderWithQris($data);
             return;
         }
 
-        $order = $this->createOrder($data);
+        // Handle Cash Payment status override
+        $paymentOverrides = [];
+        if ($this->payment_method === 'cash' && $this->markAsPaid) {
+            $paymentOverrides = [
+                'payment_status' => 'paid',
+                'status' => 'paid', // Payment model status
+            ];
+        }
+
+        $order = $this->createOrder($data, $paymentOverrides);
+
+        // Prevent Resend API rate limit (2 req/sec) if sending multiple emails
+        if (!empty($data['email']) && ($paymentOverrides['payment_status'] ?? '') === 'paid') {
+            sleep(1);
+        }
+
         $this->afterOrderCreated($order);
     }
 
@@ -80,13 +133,12 @@ class Create extends Component
     {
         $package = Package::findOrFail($data['package_id']);
         $pricePerKg = $package->price_per_kg;
-        $deliveryFee = $this->resolveDeliveryFee($data['pickup_or_delivery'], $data['delivery_fee'] ?? null);
-        $estimatedTotal = $pricePerKg * $data['estimated_weight'];
-        $amount = $estimatedTotal + ($deliveryFee ?? 0);
-        $orderCode = $data['order_code'] ?? Str::upper(Str::random(10));
+        $deliveryFee = $this->resolveDeliveryFee($data['pickup_or_delivery']);
+        $totalPrice = ($pricePerKg * $data['actual_weight']) + ($deliveryFee ?? 0);
+        $orderCode = Str::upper(Str::random(10));
 
         try {
-            $payload = app(QrisGenerator::class)->generate($amount, $orderCode);
+            $payload = app(QrisGenerator::class)->generate($totalPrice, $orderCode);
         } catch (\Throwable $th) {
             report($th);
             session()->flash('error', 'QRIS gagal dibuat. Coba beberapa saat lagi.');
@@ -100,6 +152,7 @@ class Create extends Component
                 'order_code' => $orderCode,
                 'price_per_kg' => $pricePerKg,
                 'delivery_fee' => $deliveryFee,
+                'total_price' => $totalPrice,
             ]),
             [
                 'payment_status' => 'pending',
@@ -120,7 +173,7 @@ class Create extends Component
             'qris_image_url' => $payload['qris_image_url'],
             'payload' => $payload['payload'],
             'expiry' => $expiry instanceof Carbon ? $expiry->toIso8601String() : (string) $expiry,
-            'amount' => $amount,
+            'amount' => $totalPrice,
             'order_id' => $order->id,
             'payment_id' => $payment?->id,
         ];
@@ -131,7 +184,7 @@ class Create extends Component
 
     public function checkPendingPaymentStatus(): void
     {
-        if (! $this->showQrisModal || empty($this->pendingQrisPayload['transaction_id'])) {
+        if (!$this->showQrisModal || empty($this->pendingQrisPayload['transaction_id'])) {
             return;
         }
 
@@ -154,13 +207,11 @@ class Create extends Component
 
         if (in_array($transactionStatus, ['settlement', 'capture'], true)) {
             if ($payment) {
-                $payment->status = 'paid';
-                $payment->save();
+                $payment->update(['status' => 'paid']);
             }
 
             if ($order) {
-                $order->payment_status = 'paid';
-                $order->save();
+                $order->update(['payment_status' => 'paid']);
                 $order->appendActivity('system', 'payment_settled', [
                     'method' => 'qris',
                     'transaction_id' => $this->pendingQrisPayload['transaction_id'] ?? null,
@@ -172,15 +223,11 @@ class Create extends Component
             $this->resetPendingQris();
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'], true)) {
             if ($payment) {
-                $payment->status = $transactionStatus === 'expire' ? 'expired' : 'failed';
-                $payment->save();
+                $payment->update(['status' => $transactionStatus === 'expire' ? 'expired' : 'failed']);
             }
-
             if ($order) {
-                $order->payment_status = $transactionStatus === 'expire' ? 'expired' : 'failed';
-                $order->save();
+                $order->update(['payment_status' => $transactionStatus === 'expire' ? 'expired' : 'failed']);
             }
-
             $this->cancelPendingQris('Pembayaran dibatalkan atau kedaluwarsa.');
         }
     }
@@ -205,12 +252,20 @@ class Create extends Component
     {
         $package = Package::findOrFail($data['package_id']);
         $pricePerKg = $data['price_per_kg'] ?? $package->price_per_kg;
-        $deliveryFee = $this->resolveDeliveryFee($data['pickup_or_delivery'], $data['delivery_fee'] ?? null);
-        $estimatedTotal = $pricePerKg * $data['estimated_weight'];
-        $amount = $estimatedTotal + ($deliveryFee ?? 0);
+        $deliveryFee = $this->resolveDeliveryFee($data['pickup_or_delivery']);
+        $totalPrice = $data['total_price'] ?? (($pricePerKg * $data['actual_weight']) + ($deliveryFee ?? 0));
+
         $inactiveStatuses = config('orders.inactive_statuses', ['completed', 'cancelled']);
         $queuePosition = Order::whereNotIn('status', $inactiveStatuses)->count() + 1;
         $estimatedCompletion = now()->addHours($package->turnaround_hours ?? 48);
+
+        // Determine service type
+        $serviceType = 'regular';
+        if (Str::contains(Str::lower($package->package_name), 'express')) {
+            $serviceType = 'express';
+        } elseif (Str::contains(Str::lower($package->package_name), 'kilat')) {
+            $serviceType = 'kilat';
+        }
 
         $customerPayload = [
             'name' => $data['name'],
@@ -218,7 +273,7 @@ class Create extends Component
             'address' => $data['address'],
         ];
 
-        if (Schema::hasColumn('customers', 'email')) {
+        if (!empty($data['email']) && Schema::hasColumn('customers', 'email')) {
             $customerPayload['email'] = $data['email'];
         }
 
@@ -228,12 +283,13 @@ class Create extends Component
             'order_code' => $data['order_code'] ?? Str::upper(Str::random(10)),
             'customer_id' => $customer->id,
             'package_id' => $data['package_id'],
-            'estimated_weight' => $data['estimated_weight'],
-            'service_type' => $data['service_type'],
+            'estimated_weight' => $data['actual_weight'], // Use actual as estimated initially
+            'actual_weight' => $data['actual_weight'],   // Set actual weight directly
+            'service_type' => $serviceType,
             'notes' => $data['notes'] ?? null,
             'status' => $data['status'] ?? Order::initialStatus(),
             'price_per_kg' => $pricePerKg,
-            'total_price' => $estimatedTotal,
+            'total_price' => $totalPrice,
             'payment_method' => $data['payment_method'],
             'payment_status' => $paymentOverrides['payment_status'] ?? ($data['payment_method'] === 'qris' ? 'pending' : 'skipped'),
             'queue_position' => $queuePosition,
@@ -245,7 +301,7 @@ class Create extends Component
 
         $paymentData = array_merge([
             'method' => $data['payment_method'],
-            'amount' => $amount,
+            'amount' => $totalPrice,
             'status' => $paymentOverrides['status'] ?? ($data['payment_method'] === 'qris' ? 'pending' : 'skipped'),
         ], $paymentOverrides);
 
@@ -255,20 +311,18 @@ class Create extends Component
         $order->appendActivity('admin', 'order_created', [
             'payment_method' => $data['payment_method'],
             'payment_status' => $order->payment_status,
-            'contact_email' => $data['email'] ?? null,
+            'actual_weight' => $data['actual_weight'],
         ]);
 
-        app(OrderEmailNotifier::class)->sendOrderCreated($order->fresh('customer', 'package'), $data['email'] ?? null);
+        if (!empty($data['email'])) {
+            app(OrderEmailNotifier::class)->sendOrderCreated($order->fresh('customer', 'package'), $data['email']);
+        }
 
         return $order;
     }
 
-    protected function resolveDeliveryFee(string $pickupOption, ?float $customFee): ?float
+    protected function resolveDeliveryFee(string $pickupOption): ?float
     {
-        if ($customFee !== null) {
-            return $customFee;
-        }
-
         return $pickupOption === 'delivery' ? 10000 : null;
     }
 
@@ -279,43 +333,57 @@ class Create extends Component
         }
 
         $this->successCode = $order->order_code;
-        session()->flash('message', 'Pesanan berhasil dibuat.');
+        $message = 'Pesanan berhasil dibuat.';
+        session()->flash('message', $message);
         $this->resetFormFields();
-        $this->dispatch('order-created', id: $order->id);
+        $this->dispatch('order-created', id: $order->id, message: $message);
     }
 
     protected function resetFormFields(): void
     {
         $this->reset([
+            'step',
             'name',
             'email',
             'address',
             'package_id',
-            'estimated_weight',
-            'service_type',
+            'actual_weight',
             'notes',
             'payment_method',
             'pickup_or_delivery',
-            'delivery_fee',
+            'delivery_fee'
         ]);
-        $this->service_type = 'regular';
+        $this->step = 1;
         $this->payment_method = 'cash';
         $this->pickup_or_delivery = 'none';
-        $this->delivery_fee = null;
-        $this->email = null;
+    }
+
+    public function getTotalPriceProperty()
+    {
+        if (!$this->package_id || !$this->actual_weight)
+            return 0;
+
+        $package = Package::find($this->package_id);
+        if (!$package)
+            return 0;
+
+        $basePrice = $package->price_per_kg * $this->actual_weight;
+        $deliveryFee = $this->resolveDeliveryFee($this->pickup_or_delivery) ?? 0;
+
+        return $basePrice + $deliveryFee;
     }
 
     public function render()
     {
         $view = view('livewire.admin.order.create', [
             'packages' => Package::orderBy('package_name')->get(),
-            'paymentMethods' => $this->paymentMethods,
-            'pickupOptions' => $this->pickupOptions,
+            'paymentMethods' => config('orders.payment_methods'),
+            'pickupOptions' => config('orders.pickup_options'),
             'embedded' => $this->embedded,
         ]);
 
         return $this->embedded
             ? $view
-            : $view->layout('layouts.admin', ['title' => 'Tambah Pesanan Manual']);
+            : $view->layout('layouts.admin', ['title' => 'Input Pesanan Offline']);
     }
 }
