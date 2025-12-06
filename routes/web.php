@@ -69,3 +69,12 @@ Route::post('logout', function (Logout $logout) {
 })->middleware('auth')->name('logout');
 
 require __DIR__ . '/auth.php';
+
+Route::get('/test-email', function () {
+    Illuminate\Support\Facades\Mail::raw('Test email from Susi Laundry', function ($message) {
+        $message->to('paulfajar@gmail.com') // Replace with user's email if known, or generic
+            ->subject('Test Email');
+    });
+
+    return 'Email sent';
+});
