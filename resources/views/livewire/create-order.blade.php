@@ -155,20 +155,19 @@
                     <div class="mt-6">
                         <label class="block text-sm font-semibold text-slate-700 mb-3">Metode Pembayaran</label>
                         <div class="grid grid-cols-2 gap-4">
-                            <label class="cursor-pointer relative">
-                                <input type="radio" wire:model="payment_method" value="cash" class="peer sr-only">
-                                <div class="rounded-xl border-2 border-slate-200 p-4 hover:bg-slate-50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
-                                    <div class="font-bold text-slate-900">Tunai (Cash)</div>
-                                    <div class="text-xs text-slate-500">Bayar saat selesai/antar</div>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer relative">
-                                <input type="radio" wire:model="payment_method" value="qris" class="peer sr-only">
-                                <div class="rounded-xl border-2 border-slate-200 p-4 hover:bg-slate-50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
-                                    <div class="font-bold text-slate-900">QRIS</div>
-                                    <div class="text-xs text-slate-500">Scan barcode instan</div>
-                                </div>
-                            </label>
+                            <div class="cursor-pointer rounded-xl border-2 p-4 transition-all hover:bg-slate-50
+                                {{ $payment_method === 'cash' ? 'border-primary bg-primary/5' : 'border-slate-200' }}"
+                                wire:click="$set('payment_method', 'cash')">
+                                <div class="font-bold text-slate-900">Tunai (Cash)</div>
+                                <div class="text-xs text-slate-500">Bayar saat selesai/antar</div>
+                            </div>
+
+                            <div class="cursor-pointer rounded-xl border-2 p-4 transition-all hover:bg-slate-50
+                                {{ $payment_method === 'qris' ? 'border-primary bg-primary/5' : 'border-slate-200' }}"
+                                wire:click="$set('payment_method', 'qris')">
+                                <div class="font-bold text-slate-900">QRIS</div>
+                                <div class="text-xs text-slate-500">Scan barcode instan</div>
+                            </div>
                         </div>
                         @error('payment_method') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
                     </div>
