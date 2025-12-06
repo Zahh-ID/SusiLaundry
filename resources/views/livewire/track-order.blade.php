@@ -71,8 +71,13 @@
                         <p class="text-lg font-semibold text-primary">{{ $order->status_label }}</p>
                     </div>
                     <div>
-                        <p class="text-xs uppercase text-slate-400">Estimasi Berat</p>
-                        <p class="text-lg font-semibold">{{ $order->estimated_weight }} kg</p>
+                        @if($order->actual_weight)
+                            <p class="text-xs uppercase text-slate-400">Berat Asli</p>
+                            <p class="text-lg font-semibold text-primary">{{ $order->actual_weight }} kg</p>
+                        @else
+                            <p class="text-xs uppercase text-slate-400">Estimasi Berat</p>
+                            <p class="text-lg font-semibold">{{ $order->estimated_weight }} kg</p>
+                        @endif
                     </div>
                     <div>
                         <p class="text-xs uppercase text-slate-400">Paket</p>
