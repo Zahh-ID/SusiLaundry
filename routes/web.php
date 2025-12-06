@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $packages = Package::orderBy('price_per_kg')->take(3)->get();
-    $completedOrders = \App\Models\Order::where('status', 'completed')
+    $completedOrders = \App\Models\Order::with(['customer', 'package'])
+        ->where('status', 'taken')
         ->latest()
         ->take(3)
         ->get();

@@ -62,7 +62,7 @@
                                 @forelse($completedOrders as $order)
                                     <div class="flex items-center gap-4 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
                                         <div class="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xs">
-                                            {{ substr($order->customer_name ?? 'G', 0, 1) }}
+                                            {{ substr($order->customer->name ?? 'G', 0, 1) }}
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center justify-between">
