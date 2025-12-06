@@ -113,6 +113,19 @@ class CreateOrder extends Component
             'contact_email' => $this->email,
         ]);
 
+        // Create Payment record if QRIS
+        if ($this->payment_method === 'qris') {
+            $order->payments()->create([
+                'method' => 'qris',
+                'amount' => $order->total_price,
+                'status' => 'pending',
+                'qris_url' => 'https://example.com/pay/' . $order->order_code, // Dummy URL
+                'qris_image_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . $order->order_code, // Generate QR based on order code
+                'expiry_time' => now()->addHours(1),
+                'regeneration_count' => 0,
+            ]);
+        }
+
         app(OrderEmailNotifier::class)->sendOrderCreated($order->fresh('customer', 'package'), $this->email);
 
         return redirect()->route('order.success', ['code' => $order->order_code]);

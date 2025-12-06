@@ -19,5 +19,11 @@ class OrderObserver
                 Mail::to($order->customer->email)->send(new OrderStatusUpdatedMail($order));
             }
         }
+
+        if ($order->isDirty('payment_status') && $order->payment_status === 'paid') {
+            if ($order->customer && $order->customer->email) {
+                Mail::to($order->customer->email)->send(new \App\Mail\PaymentReceiptMail($order));
+            }
+        }
     }
 }
