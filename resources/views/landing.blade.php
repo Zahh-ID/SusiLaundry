@@ -9,7 +9,7 @@
                 <div class="max-w-2xl animate-fade-in-up">
                     <div class="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-600 mb-6">
                         <span class="flex h-2 w-2 rounded-full bg-indigo-600 mr-2 animate-pulse"></span>
-                        Laundry Premium #1 di Yogyakarta
+                        Laundry Premium #1 di Blitar
                     </div>
                     <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl mb-6 leading-tight">
                         Cuci Bersih, <br>

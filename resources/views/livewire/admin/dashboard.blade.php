@@ -108,7 +108,7 @@
                                                             </td>
                                                             <td class="whitespace-nowrap px-6 py-4 text-sm">
                                                                 <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                                                                                                                                            {{ match ($order->status) {
+                                                                                                                                                                                        {{ match ($order->status) {
                                     'completed' => 'bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20',
                                     'processing', 'washing' => 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10',
                                     'pending' => 'bg-yellow-50 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',
@@ -153,8 +153,8 @@
                                     </p>
                                 </div>
                                 <div class="flex flex-none items-center gap-x-4">
-                                    <a href="{{ route('admin.packages.edit', $package) }}"
-                                        class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:block">Edit</a>
+                                    <a href="{{ route('admin.packages.index') }}"
+                                        class="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:block">Kelola</a>
                                 </div>
                             </li>
                         @endforeach

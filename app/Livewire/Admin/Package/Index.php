@@ -8,6 +8,11 @@ use Livewire\Component;
 class Index extends Component
 {
     public $showCreateModal = false;
+    public $showDetailModal = false; // New for Info Modal
+
+    public $isEditMode = false;
+    public $packageId;
+    public $viewingPackage; // Stores package for Detail Modal
 
     // Form properties
     public $package_name;
@@ -18,16 +23,51 @@ class Index extends Component
 
     public function create()
     {
-        $this->reset(['package_name', 'description', 'price_per_kg', 'billing_type', 'turnaround_hours']);
-        $this->billing_type = 'per_kg';
-        $this->turnaround_hours = 48;
+        $this->resetForm();
         $this->showCreateModal = true;
+    }
+
+    public function edit($id)
+    {
+        $this->resetForm();
+        $this->isEditMode = true;
+        $this->packageId = $id;
+
+        $package = Package::find($id);
+        if ($package) {
+            $this->package_name = $package->package_name;
+            $this->description = $package->description;
+            $this->price_per_kg = $package->price_per_kg;
+            $this->billing_type = $package->billing_type;
+            $this->turnaround_hours = $package->turnaround_hours;
+            $this->showCreateModal = true;
+        }
+    }
+
+    public function view($id)
+    {
+        $this->viewingPackage = Package::find($id);
+        $this->showDetailModal = true;
+    }
+
+    public function closeDetailModal()
+    {
+        $this->showDetailModal = false;
+        $this->viewingPackage = null;
     }
 
     public function closeModal()
     {
         $this->showCreateModal = false;
         $this->resetValidation();
+        $this->resetForm();
+    }
+
+    private function resetForm()
+    {
+        $this->reset(['package_name', 'description', 'price_per_kg', 'billing_type', 'turnaround_hours', 'packageId', 'isEditMode']);
+        $this->billing_type = 'per_kg';
+        $this->turnaround_hours = 48;
     }
 
     public function save()
@@ -40,15 +80,29 @@ class Index extends Component
             'turnaround_hours' => 'required|integer|min:1|max:720',
         ]);
 
-        Package::create([
-            'package_name' => $this->package_name,
-            'description' => $this->description,
-            'price_per_kg' => $this->price_per_kg,
-            'billing_type' => $this->billing_type,
-            'turnaround_hours' => $this->turnaround_hours,
-        ]);
+        if ($this->isEditMode) {
+            $package = Package::find($this->packageId);
+            if ($package) {
+                $package->update([
+                    'package_name' => $this->package_name,
+                    'description' => $this->description,
+                    'price_per_kg' => $this->price_per_kg,
+                    'billing_type' => $this->billing_type,
+                    'turnaround_hours' => $this->turnaround_hours,
+                ]);
+                session()->flash('message', 'Package successfully updated.');
+            }
+        } else {
+            Package::create([
+                'package_name' => $this->package_name,
+                'description' => $this->description,
+                'price_per_kg' => $this->price_per_kg,
+                'billing_type' => $this->billing_type,
+                'turnaround_hours' => $this->turnaround_hours,
+            ]);
+            session()->flash('message', 'Package successfully created.');
+        }
 
-        session()->flash('message', 'Package successfully created.');
         $this->closeModal();
     }
 

@@ -36,7 +36,7 @@
                 </thead>
                 <tbody>
                     @forelse($packages as $package)
-                        <tr class="border-t border-slate-100">
+                        <tr class="border-t border-slate-100" wire:key="{{ $package->id }}">
                             <td class="px-4 py-3 font-semibold text-slate-900">{{ $package->package_name }}</td>
                             <td class="px-4 py-3 text-sm text-slate-600">{{ $package->description }}</td>
                             <td class="px-4 py-3 font-semibold">Rp {{ number_format($package->price_per_kg, 0, ',', '.') }}
@@ -47,19 +47,32 @@
                             <td class="px-4 py-3 text-sm text-slate-600">{{ $package->turnaround_hours }}</td>
                             <td class="px-4 py-3 text-sm font-semibold">
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('admin.packages.edit', $package) }}"
-                                       class="inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm hover:border-amber-300 hover:bg-amber-100 hover:text-amber-700 transition-all font-medium"
-                                       title="Edit Paket">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <button wire:click="view({{ $package->id }})"
+                                        class="inline-flex items-center justify-center rounded-lg border border-sky-200 bg-sky-50 p-2 text-sky-600 shadow-sm hover:border-sky-300 hover:bg-sky-100 hover:text-sky-700 transition-all font-medium"
+                                        title="Detail Paket">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        <span class="sr-only">Detail</span>
+                                    </button>
+
+                                    <button wire:click="edit({{ $package->id }})"
+                                        class="inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 p-2 text-amber-600 shadow-sm hover:border-amber-300 hover:bg-amber-100 hover:text-amber-700 transition-all font-medium"
+                                        title="Edit Paket">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                         <span class="sr-only">Edit</span>
-                                    </a>
+                                    </button>
 
-                                    <button type="button"
-                                        onclick="confirm('Hapus paket {{ $package->package_name }}?') || event.stopImmediatePropagation()"
-                                        wire:click="delete({{ $package->id }})"
+                                    <button type="button" wire:click="delete({{ $package->id }})"
+                                        wire:confirm="Yakin ingin menghapus paket {{ $package->package_name }}?"
                                         class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-red-600 shadow-sm hover:border-red-300 hover:bg-red-100 hover:text-red-700 transition-all font-medium"
                                         title="Hapus Paket">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -97,8 +110,10 @@
                 </button>
 
                 <div class="mb-8">
-                    <h2 class="text-2xl font-bold text-slate-900">Buat Paket Baru</h2>
-                    <p class="mt-2 text-sm text-slate-500">Isi detail paket laundry baru.</p>
+                    <h2 class="text-2xl font-bold text-slate-900">{{ $isEditMode ? 'Edit Paket' : 'Buat Paket Baru' }}</h2>
+                    <p class="mt-2 text-sm text-slate-500">
+                        {{ $isEditMode ? 'Perbarui detail paket laundry.' : 'Isi detail paket laundry baru.' }}
+                    </p>
                 </div>
 
                 <form wire:submit.prevent="save" class="space-y-6">
@@ -150,7 +165,7 @@
                         </button>
                         <button type="submit"
                             class="rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-indigo-600 transition-all hover:scale-[1.02]">
-                            Simpan Paket
+                            {{ $isEditMode ? 'Simpan Perubahan' : 'Simpan Paket' }}
                         </button>
                     </div>
                 </form>
@@ -160,6 +175,77 @@
                     overflow: hidden;
                 }
             </style>
+        </div>
+    @endif
+
+    {{-- Info Detail Modal --}}
+    @if($showDetailModal && $viewingPackage)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-3 py-5">
+            <div class="relative w-full max-w-lg transform rounded-2xl sm:rounded-3xl bg-white p-8 shadow-2xl animate-fade-in-up overflow-hidden"
+                @click.away="$wire.closeDetailModal()">
+
+                <button type="button"
+                    class="absolute right-6 top-6 z-10 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow hover:border-primary hover:text-primary"
+                    wire:click="closeDetailModal">
+                    ✕ <span>Tutup</span>
+                </button>
+
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Detail Paket</h2>
+                    <p class="text-sm text-slate-500">Informasi lengkap paket laundry.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Nama
+                            Paket</label>
+                        <p class="text-lg font-bold text-slate-900">{{ $viewingPackage->package_name }}</p>
+                    </div>
+
+                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                        <label
+                            class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Deskripsi</label>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ $viewingPackage->description }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                            <label
+                                class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Harga</label>
+                            <p class="text-lg font-bold text-primary">Rp
+                                {{ number_format($viewingPackage->price_per_kg, 0, ',', '.') }}
+                            </p>
+                        </div>
+                        <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Jenis
+                                Tagihan</label>
+                            <p class="text-sm font-semibold text-slate-900 capitalize">
+                                {{ str_replace('_', ' ', $viewingPackage->billing_type) }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                            <label
+                                class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Durasi</label>
+                            <p class="text-sm font-semibold text-slate-900">{{ $viewingPackage->turnaround_hours }} Jam</p>
+                        </div>
+                        <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">ID
+                                Paket</label>
+                            <p class="text-sm font-mono text-slate-600">#{{ $viewingPackage->id }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+                    <button wire:click="edit({{ $viewingPackage->id }}); closeDetailModal()"
+                        class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
+                        Edit Paket Ini
+                    </button>
+                </div>
+            </div>
         </div>
     @endif
 </div>
